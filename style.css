@@ -29,28 +29,27 @@ body{
   top: -3vh;
   outline: 1vh solid #241f21ff;
 }
-.button-a{
-    height: 5vh;
-    width: 5vh;
-    background-color: #241f21ff;
-    border-radius: 5vh;
-    top: 40vh;
-    right: 15vh; 
-}
-.button-b {
+.button-a,.button-b,.button-c{
   height: 5vh;
   width: 5vh;
   background-color: #241f21ff;
+  outline: 1vh solid #241f21ff;
+  outline-offset: -0.5vh;
+}
+
+.button-a{
+    border-radius: 5vh;
+    top: 38vh;
+    right: 17vh; 
+}
+.button-b {
   border-radius: 5vh;
-  top: 45vh;
+  top: 43vh;
 }
 .button-c {
-    height: 5vh;
-    width: 5vh;
-    background-color: #241f21ff;
     border-radius: 5vh;
-    top: 40vh;
-    left: 15vh; 
+    top: 38vh;
+    left: 17vh; 
 }
 .button-a:hover,.button-b:hover,.button-c:hover {
     background-color: #f1f8d4ff;
