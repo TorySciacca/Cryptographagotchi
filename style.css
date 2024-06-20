@@ -38,9 +38,6 @@ body{
   border-radius: 5vh;
   top: 43vh;
 }
-.button:hover{
-    background-color: #f1f8d4ff;
-  }
 
 .ui-text{
   font-size: 1.9vh;
