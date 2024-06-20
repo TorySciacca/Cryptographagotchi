@@ -8,12 +8,17 @@
     <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1 id="debug"></h1>
+        <div><h1 id="debug"></h1></div>
 	    <script src="main.js"></script>
         <div class="backdrop"></div>
-        <div class="screen"></div>
-        <div class="button-a" onclick="button_a()"></div>
-        <div class="button-b" onclick="button_b()"></div>
-        <div class="button-c" onclick="button_c()"></div>
+        <div class="screen">
+            <div class="ui-text">
+                <h1>hello world</h1>
+            </div> 
+        </div>
+        <div class="button" id = 'a' onclick="button_a()" style="top:38vh;right:17vh"></div>
+        <div class="button" id ='b' onclick="button_b()"></div>
+        <div class="button" id ='c' onclick="button_c()" style="top:38vh;left:17vh"></div>
+        
     </body>
 </html>

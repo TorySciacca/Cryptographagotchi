@@ -3,7 +3,7 @@ body{
     font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     color: #241f21ff;
 }
-.backdrop,.screen,.button-b,.button-a,.button-c{
+.backdrop,.screen,.button,.ui-text{
   position: absolute; 
   left: 0; 
   right: 0; 
@@ -29,28 +29,22 @@ body{
   top: -3vh;
   outline: 1vh solid #241f21ff;
 }
-.button-a,.button-b,.button-c{
+.button{
   height: 5vh;
   width: 5vh;
   background-color: #241f21ff;
   outline: 1vh solid #241f21ff;
   outline-offset: -0.5vh;
-}
-
-.button-a{
-    border-radius: 5vh;
-    top: 38vh;
-    right: 17vh; 
-}
-.button-b {
   border-radius: 5vh;
   top: 43vh;
 }
-.button-c {
-    border-radius: 5vh;
-    top: 38vh;
-    left: 17vh; 
-}
-.button-a:hover,.button-b:hover,.button-c:hover {
+.button:hover{
     background-color: #f1f8d4ff;
   }
+
+.ui-text{
+  font-size: 1.9vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
