@@ -70,7 +70,29 @@ function on_start() {
 
 //
 
+var game_state = 0 //int
+var load_screen_state = 0
+
+function launch_device() {
+    
+    if (load_screen_state == 0){
+        load_screen_state += 1
+        document.getElementById("ui_screen_text").innerText = 'crypto \n\n\n'
+    } else if(load_screen_state == 1){
+        load_screen_state += 1
+        document.getElementById("ui_screen_text").innerText = 'crypto\ngrapha\n\n'
+    } else if(load_screen_state == 2){
+        load_screen_state += 1
+        document.getElementById("ui_screen_text").innerText = 'crypto\ngrapha\ngotchi'
+    } else if(load_screen_state == 3){
+
+        document.getElementById("ui_screen_text").innerText = 'sign in \nsign up'
+        game_state = 1
+    }console.log(load_screen_state)
+}
+
 function button_a() {
+    launch_device() 
     document.getElementById('a').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('select');
@@ -79,7 +101,8 @@ function button_a() {
 };
 
 function button_b() {
-     document.getElementById('b').style.backgroundColor = '#f1f8d4ff'
+    launch_device()
+    document.getElementById('b').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('execute');
         document.getElementById("debug").innerText = 'execute'
@@ -87,6 +110,7 @@ function button_b() {
 };
 
 function button_c() {
+    launch_device()
      document.getElementById('c').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('cancel');
