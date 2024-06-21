@@ -72,27 +72,41 @@ function on_start() {
 
 var game_state = 0 //int
 var load_screen_state = 0
+var login_screen_state = 1
 
 function launch_device() {
     
     if (load_screen_state == 0){
-        load_screen_state += 1
-        document.getElementById("ui_screen_text").innerText = 'crypto \n\n\n'
-    } else if(load_screen_state == 1){
-        load_screen_state += 1
-        document.getElementById("ui_screen_text").innerText = 'crypto\ngrapha\n\n'
+        load_screen_state += 1;
+        document.getElementById("ui_screen_text_l1").innerText = 'crypto'
+    } else if(load_screen_state == 1){                          
+        load_screen_state += 1;
+        document.getElementById("ui_screen_text_l2").innerText = 'grapha'
     } else if(load_screen_state == 2){
-        load_screen_state += 1
-        document.getElementById("ui_screen_text").innerText = 'crypto\ngrapha\ngotchi'
+        load_screen_state += 1;
+        document.getElementById("ui_screen_text_l3").innerText = 'gotchi'
     } else if(load_screen_state == 3){
 
-        document.getElementById("ui_screen_text").innerText = 'sign in \nsign up'
+        document.getElementById("ui_screen_text_l1").innerText = 'decrypt';
+        document.getElementById("ui_screen_text_l2").innerText = 'new egg';
+         document.getElementById("ui_screen_text_l3").innerText = '';
         game_state = 1
-    }console.log(load_screen_state)
+    }console.log(game_state)
+}
+
+function login_screen_selector(){ //bad function name, please rename
+    document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'none'
+    if (login_screen_state == 1 ) {
+        login_screen_state = 2
+    } else {
+        login_screen_state = 1
+    };
+    document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'underline'
 }
 
 function button_a() {
     launch_device() 
+    if (game_state == 1){login_screen_selector()}
     document.getElementById('a').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('select');
@@ -102,6 +116,7 @@ function button_a() {
 
 function button_b() {
     launch_device()
+    if (game_state == 1){console.log('make selection')}
     document.getElementById('b').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('execute');
@@ -111,6 +126,7 @@ function button_b() {
 
 function button_c() {
     launch_device()
+    if (game_state == 1){login_screen_selector()}
      document.getElementById('c').style.backgroundColor = '#f1f8d4ff'
     if (debug == true){
         console.log('cancel');

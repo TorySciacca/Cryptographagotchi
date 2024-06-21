@@ -41,7 +41,5 @@ body{
 
 .ui-text{
   font-size: 1.8vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
 }
