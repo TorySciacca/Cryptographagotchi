@@ -21,26 +21,29 @@ function init_debug(){
 // init and mapping functions
 
 function map_keyboard_shortcuts() { //alternative way of interacting with UI
+    const SELECT_COLOUR = '#241f21ff'
+    const INITAL_COLOUR = '#f1f8d4ff'
+
     window.addEventListener('keydown',(event) => {
         if (event.key == '1'){
             button_a()
-            document.getElementById('a').style.backgroundColor = '#f1f8d4ff';
+            document.getElementById('a').style.backgroundColor = INITAL_COLOUR;
         } else if (event.key == '2'){
             button_b()
-            document.getElementById('b').style.backgroundColor = '#f1f8d4ff';
+            document.getElementById('b').style.backgroundColor = INITAL_COLOUR;
         } else if (event.key == '3'){
             button_c()
-            document.getElementById('c').style.backgroundColor = '#f1f8d4ff';
+            document.getElementById('c').style.backgroundColor = INITAL_COLOUR;
         }
     });
 
     window.addEventListener('keyup',(event) => {
         if (event.key == '1'){
-            document.getElementById('a').style.backgroundColor = '#241f21ff';
+            document.getElementById('a').style.backgroundColor = SELECT_COLOUR;
         } else if (event.key == '2'){
-            document.getElementById('b').style.backgroundColor = '#241f21ff';
+            document.getElementById('b').style.backgroundColor = SELECT_COLOUR;
         } else if (event.key == '3'){
-            document.getElementById('c').style.backgroundColor = '#241f21ff';
+            document.getElementById('c').style.backgroundColor = SELECT_COLOUR;
         }
     });
 
@@ -56,9 +59,9 @@ function map_keyboard_shortcuts() { //alternative way of interacting with UI
 
     window.addEventListener('mouseup',(event) => {
         if (event.buttons == 0){
-            document.getElementById('a').style.backgroundColor = '#241f21ff';
-            document.getElementById('b').style.backgroundColor = '#241f21ff';
-            document.getElementById('c').style.backgroundColor = '#241f21ff'; }
+            document.getElementById('a').style.backgroundColor = SELECT_COLOUR;
+            document.getElementById('b').style.backgroundColor = SELECT_COLOUR;
+            document.getElementById('c').style.backgroundColor = SELECT_COLOUR; }
     })
 }
 
@@ -67,12 +70,30 @@ function on_start() {
     map_keyboard_shortcuts() 
 };
 
-
 //
 
-var game_state = 0 //int
+var game_state = 0 //0 - boot, 1 - login, 2 - decrypt, 3 - generate
 var load_screen_state = 0
 var login_screen_state = 1
+
+
+function reset_screen_text(set_to_boot_screen){
+    if(set_to_boot_screen){
+        document.getElementById("ui_screen_text_l1").innerText = 'e7a7e6';
+        document.getElementById("ui_screen_text_l2").innerText = 'a7e6c0';
+        document.getElementById("ui_screen_text_l3").innerText = '13e389';
+
+    } else {
+        document.getElementById("ui_screen_text_l1").innerText = '';
+        document.getElementById("ui_screen_text_l2").innerText = '';
+        document.getElementById("ui_screen_text_l3").innerText = '';
+
+    }
+
+    document.getElementById("ui_screen_text_l1").style.textDecoration = 'none';
+    document.getElementById("ui_screen_text_l2").style.textDecoration = 'none';
+    document.getElementById("ui_screen_text_l3").style.textDecoration = 'none';
+}
 
 function launch_device() {
     
@@ -86,15 +107,20 @@ function launch_device() {
         load_screen_state += 1;
         document.getElementById("ui_screen_text_l3").innerText = 'gotchi'
     } else if(load_screen_state == 3){
-
+        load_screen_state += 1; //important for reloading this script
         document.getElementById("ui_screen_text_l1").innerText = 'decrypt';
         document.getElementById("ui_screen_text_l2").innerText = 'new egg';
          document.getElementById("ui_screen_text_l3").innerText = '';
+         login_screen_state = 2
+         login_screen_selector()
         game_state = 1
+    }else if (load_screen_state > 3){
+        load_screen_state = 0;
+        reset_screen_text(true)
     }console.log(game_state)
 }
 
-function login_screen_selector(){ //bad function name, please rename
+function login_screen_selector(){ 
     document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'none'
     if (login_screen_state == 1 ) {
         login_screen_state = 2
@@ -104,34 +130,50 @@ function login_screen_selector(){ //bad function name, please rename
     document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'underline'
 }
 
+function decrypt(){
+    console.log('decrypt')
+    reset_screen_text(false)
+}
+
+function generate_new_egg(){
+    console.log('generate new egg')
+    reset_screen_text(false)
+}
+
 function button_a() {
-    launch_device() 
-    if (game_state == 1){login_screen_selector()}
-    document.getElementById('a').style.backgroundColor = '#f1f8d4ff'
-    if (debug == true){
-        console.log('select');
-        document.getElementById("debug").innerText = 'select'
-        }
+    if (game_state == 0){launch_device()}
+    else if (game_state == 1){login_screen_selector()};
+
+    document.getElementById('a').style.backgroundColor = '#f1f8d4ff';
+
+    if (debug == true){document.getElementById("debug").innerText = 'select'}
 };
 
 function button_b() {
-    launch_device()
-    if (game_state == 1){console.log('make selection')}
-    document.getElementById('b').style.backgroundColor = '#f1f8d4ff'
-    if (debug == true){
-        console.log('execute');
-        document.getElementById("debug").innerText = 'execute'
-        }
+    if (game_state == 0){launch_device()}
+    else if (game_state == 1){
+        if (login_screen_state == 1){
+            game_state = 2
+            decrypt()
+        } else if (login_screen_state == 2){
+            game_state = 3
+            generate_new_egg()
+        };
+    }
+
+    document.getElementById('b').style.backgroundColor = '#f1f8d4ff';
+
+    if (debug == true){document.getElementById("debug").innerText = 'execute'}
 };
 
 function button_c() {
-    launch_device()
-    if (game_state == 1){login_screen_selector()}
-     document.getElementById('c').style.backgroundColor = '#f1f8d4ff'
-    if (debug == true){
-        console.log('cancel');
-        document.getElementById("debug").innerText = 'cancel'
-        }
+    if (game_state == 0){launch_device()}
+    else if (game_state == 1){game_state -= 1;launch_device()}
+    else if (game_state == 2 || game_state == 3){game_state = 0;load_screen_state = 3,launch_device()};
+
+    document.getElementById('c').style.backgroundColor = '#f1f8d4ff';
+
+    if (debug == true){document.getElementById("debug").innerText = 'cancel'}
 };
 
 on_start()
