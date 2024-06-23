@@ -141,8 +141,8 @@ function generate_new_egg(){
 }
 
 function button_a() {
-    if (game_state == 0){launch_device()}
-    else if (game_state == 1){login_screen_selector()};
+    //if (game_state == 0){launch_device()}
+    if (game_state == 1){login_screen_selector()};
 
     document.getElementById('a').style.backgroundColor = '#f1f8d4ff';
 
@@ -167,8 +167,8 @@ function button_b() {
 };
 
 function button_c() {
-    if (game_state == 0){launch_device()}
-    else if (game_state == 1){game_state -= 1;launch_device()}
+    //if (game_state == 0){launch_device()}
+    if (game_state == 1){game_state -= 1;launch_device()}
     else if (game_state == 2 || game_state == 3){game_state = 0;load_screen_state = 3,launch_device()};
 
     document.getElementById('c').style.backgroundColor = '#f1f8d4ff';
