@@ -1,11 +1,11 @@
 @font-face {
-  font-family: 'ocr'; /* Name your font family */
-  src: url('fonts/ocr-a-std.ttf'); /* Locate the .ttf file within your directory*/
+  font-family: 'ocr';
+  src: url('fonts/ocr-a-std.ttf');
 }
 
 body{
     background-color: white;
-    font-family: 'ocr',monospace;/* 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+    font-family: 'ocr',monospace; /* 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
     color: #241f21ff;
 }
 .backdrop,.screen,.button,.ui-text{
