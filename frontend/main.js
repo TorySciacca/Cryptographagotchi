@@ -178,3 +178,15 @@ function button_c() {
 };
 
 on_start()
+
+
+//API TEST FUNCTIONS
+function getAllUsers() {
+    fetch('/api/users')
+        .then(response => response.json())
+        .then(data => {
+            console.log('All Users:', data);
+            alert('All Users retrieved! Check console for details.');
+        })
+        .catch(error => console.error('Error fetching users:', error));
+}

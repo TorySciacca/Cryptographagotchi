@@ -11,6 +11,12 @@ const db = new sqlite3.Database('database.db');
 // Middleware to parse JSON request body
 app.use(express.json());
 
+// Middleware to log incoming requests
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
+
 // API Endpoints
 
 // GET all users
@@ -94,7 +100,7 @@ app.delete('/api/users/:id', (req, res) => {
 });
 
 // Serve static files from 'public' directory
-app.use(express.static('public'));
+app.use(express.static('../frontend'));
 
 // Start server
 app.listen(port, () => {
