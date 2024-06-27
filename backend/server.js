@@ -30,10 +30,10 @@ app.get('/api/users', (req, res) => {
     });
 });
 
-// GET single user by ID
-app.get('/api/users/:id', (req, res) => {
-    const userId = req.params.id;
-    db.get('SELECT * FROM users WHERE id = ?', [userId], (err, row) => {
+// GET single user by username
+app.get('/api/users/:name', (req, res) => {
+    const username = req.params.name;
+    db.get('SELECT * FROM users WHERE name = ?', [username], (err, row) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -48,17 +48,18 @@ app.get('/api/users/:id', (req, res) => {
 
 // POST a new user
 app.post('/api/users', (req, res) => {
-    const { name, email } = req.body;
-    if (!name || !email) {
-        res.status(400).json({ message: 'Name and email are required' });
+    
+    const {name} = req.body;
+    if (!name) {
+        res.status(400).json({ message: 'Username is required' });
         return;
     }
-    db.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email], function(err) {
+    db.run('INSERT INTO users (name) VALUES (?)', [name], function(err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json({ id: this.lastID, name, email });
+        res.json({ name }); 
     });
 });
 
@@ -99,7 +100,7 @@ app.delete('/api/users/:id', (req, res) => {
     });
 });
 
-// Serve static files from 'public' directory
+// Serve static files from 'frontend' directory
 app.use(express.static('../frontend'));
 
 // Start server

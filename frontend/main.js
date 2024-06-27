@@ -180,13 +180,39 @@ function button_c() {
 on_start()
 
 
-//API TEST FUNCTIONS
+//REST API FUNCTIONS
 function getAllUsers() {
     fetch('/api/users')
         .then(response => response.json())
         .then(data => {
             console.log('All Users:', data);
-            alert('All Users retrieved! Check console for details.');
         })
         .catch(error => console.error('Error fetching users:', error));
+}
+
+function getUserByUsername(username) {
+    fetch(`/api/users/${username}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('User:', data);
+    })
+    .catch(error => console.error('Error fetching user:', error));
+}
+
+function postUser(username){
+    fetch('/api/users',{
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: username})
+    })
+    .then(res => {
+        return res.json()
+    })
+    .then(data => console.log(data))
+    .catch(error => console.log('ERROR', error))
 }
