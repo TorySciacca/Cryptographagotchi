@@ -107,8 +107,8 @@ function launch_device() {
         document.getElementById("ui_screen_text_l3").innerText = 'gotchi'
     } else if(load_screen_state == 3){
         load_screen_state += 1; //important for reloading this script
-        document.getElementById("ui_screen_text_l1").innerText = 'decrypt';
-        document.getElementById("ui_screen_text_l2").innerText = 'new egg';
+        document.getElementById("ui_screen_text_l1").innerText = 'sign in';
+        document.getElementById("ui_screen_text_l2").innerText = 'sign up';
          document.getElementById("ui_screen_text_l3").innerText = '';
          login_screen_state = 2
          login_screen_selector()
@@ -128,6 +128,27 @@ function login_screen_selector(){
     };
     document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'underline'
 }
+
+function update_selector(selector,min_value,max_value) { 
+    if (selector < max_value){
+        selector++
+    } else {
+        selector = min_value
+    }
+}  
+
+// STATE 1
+
+function launch_sign_in(){
+    reset_screen_text(false)
+}
+
+function launch_sign_up(){
+    reset_screen_text(false)
+}
+
+
+// STATE 2 
 
 function decrypt(){
     console.log('decrypt')
@@ -152,14 +173,17 @@ function button_a() {
 
 function button_b() {
     if (game_state == 0){launch_device()}
-    else if (game_state == 1){
+
+    else if (game_state == 1){ //
         if (login_screen_state == 1){
             game_state = 2
-            decrypt()
+            launch_sign_in()
         } else if (login_screen_state == 2){
             game_state = 3
-            generate_new_egg()
-        };
+            launch_sign_up()
+        };}
+    else if (game_state == 2){ //sign in menu
+        
     }
 
     document.getElementById('b').style.backgroundColor = '#f1f8d4ff';
@@ -191,7 +215,7 @@ function getAllUsers() {
 }
 
 function getUserByUsername(username) {
-    fetch(`/api/users/${username}`)
+    fetch(`/api/users/${btoa(username)}`)
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -208,7 +232,7 @@ function postUser(username){
     fetch('/api/users',{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name: username})
+        body: JSON.stringify({name: btoa(username)})
     })
     .then(res => {
         return res.json()
