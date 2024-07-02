@@ -1,4 +1,3 @@
-
 var debug = true //bool to determine if debug mode is on/off
 
 function set_debug(set_debug) {
@@ -70,6 +69,8 @@ function on_start() {
     map_keyboard_shortcuts() 
 };
 
+on_start()
+
 //
 
 var game_state = 0 //0 - boot, 1 - login, 2 - decrypt, 3 - generate
@@ -77,6 +78,11 @@ var load_screen_state = 0
 var login_screen_state = 1
 
 function reset_screen_text(set_to_boot_screen){
+
+    document.getElementById("ui_screen_text_l1").style.textDecoration = 'none';
+    document.getElementById("ui_screen_text_l2").style.textDecoration = 'none';
+    document.getElementById("ui_screen_text_l3").style.textDecoration = 'none';
+
     if(set_to_boot_screen){
         document.getElementById("ui_screen_text_l1").innerText = 'e7a7e6';
         document.getElementById("ui_screen_text_l2").innerText = 'a7e6c0';
@@ -88,10 +94,6 @@ function reset_screen_text(set_to_boot_screen){
         document.getElementById("ui_screen_text_l3").innerText = '';
 
     }
-
-    document.getElementById("ui_screen_text_l1").style.textDecoration = 'none';
-    document.getElementById("ui_screen_text_l2").style.textDecoration = 'none';
-    document.getElementById("ui_screen_text_l3").style.textDecoration = 'none';
 }
 
 function launch_device() {
@@ -200,9 +202,6 @@ function button_c() {
 
     if (debug == true){document.getElementById("debug").innerText = 'cancel'}
 };
-
-on_start()
-
 
 //REST API FUNCTIONS
 function getAllUsers() {
