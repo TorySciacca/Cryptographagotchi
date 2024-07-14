@@ -1,241 +1,287 @@
-var debug = true //bool to determine if debug mode is on/off
+let debugMode: boolean = true; // bool to determine if debug mode is on/off
 
-function set_debug(set_debug:boolean):void {
-    debug = set_debug
-
-    if (debug) {
-        const debug = document.getElementById("debug").innerText = 'debug on';
-    } else {
-        document.getElementById("debug").innerText = ' ';
+function setDebug(debugMode: boolean): void {
+    const debugElement = document.getElementById("debug");
+    if (debugElement) {
+        debugElement.innerText = debugMode ? 'debug on' : '';
     }
-};
-
-function init_debug(){
-    if(window.location.href.indexOf("GitHub")) // If the URL is in a github folder location, then user is likely a dev
-        { set_debug(true) }
-    else
-        { set_debug(false)}
-    };
-
-// init and mapping functions
-
-function map_keyboard_shortcuts() { //alternative way of interacting with UI
-    const SELECT_COLOUR = '#241f21ff'
-    const INITAL_COLOUR = '#f1f8d4ff'
-
-    window.addEventListener('keydown',(event) => {
-        if (event.key == '1'){
-            button_a()
-            document.getElementById('a').style.backgroundColor = INITAL_COLOUR;
-        } else if (event.key == '2'){
-            button_b()
-            document.getElementById('b').style.backgroundColor = INITAL_COLOUR;
-        } else if (event.key == '3'){
-            button_c()
-            document.getElementById('c').style.backgroundColor = INITAL_COLOUR;
-        }
-    });
-
-    window.addEventListener('keyup',(event) => {
-        if (event.key == '1'){
-            document.getElementById('a').style.backgroundColor = SELECT_COLOUR;
-        } else if (event.key == '2'){
-            document.getElementById('b').style.backgroundColor = SELECT_COLOUR;
-        } else if (event.key == '3'){
-            document.getElementById('c').style.backgroundColor = SELECT_COLOUR;
-        }
-    });
-
-    window.addEventListener('mousedown',(event) => {
-        if (event.target == document.getElementById('a')){
-            button_a()
-        } else if (event.target == document.getElementById('b')) {
-            button_b()
-        } else if (event.target == document.getElementById('c')) {
-            button_c()
-        }
-    });
-
-    window.addEventListener('mouseup',(event) => {
-        if (event.buttons == 0){
-            document.getElementById('a').style.backgroundColor = SELECT_COLOUR;
-            document.getElementById('b').style.backgroundColor = SELECT_COLOUR;
-            document.getElementById('c').style.backgroundColor = SELECT_COLOUR; }
-    })
 }
 
-function on_start() {
-    init_debug()
-    map_keyboard_shortcuts() 
-};
+function initDebug(): void {
+    if (window.location.href.indexOf("GitHub") !== -1) { // Check for GitHub in the URL
+        setDebug(true);
+    } else {
+        setDebug(false);
+    }
+}
 
-on_start()
+// Init and mapping functions
+
+function mapKeyboardShortcuts(): void {
+    const SELECT_COLOUR: string = '#241f21ff';
+    const INITIAL_COLOUR: string = '#f1f8d4ff';
+
+    window.addEventListener('keydown', (event: KeyboardEvent) => {
+        switch (event.key) {
+            case '1':
+                buttonA();
+                setBackgroundColor('a', INITIAL_COLOUR);
+                break;
+            case '2':
+                buttonB();
+                setBackgroundColor('b', INITIAL_COLOUR);
+                break;
+            case '3':
+                buttonC();
+                setBackgroundColor('c', INITIAL_COLOUR);
+                break;
+        }
+    });
+
+    window.addEventListener('keyup', (event: KeyboardEvent) => {
+        switch (event.key) {
+            case '1':
+                setBackgroundColor('a', SELECT_COLOUR);
+                break;
+            case '2':
+                setBackgroundColor('b', SELECT_COLOUR);
+                break;
+            case '3':
+                setBackgroundColor('c', SELECT_COLOUR);
+                break;
+        }
+    });
+
+    window.addEventListener('mousedown', (event: MouseEvent) => {
+        const targetId = (event.target as HTMLElement)?.id;
+        switch (targetId) {
+            case 'a':
+                buttonA();
+                break;
+            case 'b':
+                buttonB();
+                break;
+            case 'c':
+                buttonC();
+                break;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        setBackgroundColor('a', SELECT_COLOUR);
+        setBackgroundColor('b', SELECT_COLOUR);
+        setBackgroundColor('c', SELECT_COLOUR);
+    });
+}
+
+function setBackgroundColor(elementId: string, color: string): void {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.backgroundColor = color;
+    }
+}
+
+function onStart(): void {
+    document.addEventListener('DOMContentLoaded', () => {
+        initDebug();
+        mapKeyboardShortcuts();
+    });
+}
+
+onStart();
 
 //
 
-var game_state = 0 //0 - boot, 1 - login, 2 - decrypt, 3 - generate
-var load_screen_state = 0
-var login_screen_state = 1
+let gameState: number = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
+let loadScreenState: number = 0;
+let loginScreenState: number = 1;
 
-function reset_screen_text(set_to_boot_screen){
+function resetScreenText(setToBootScreen: boolean): void {
+    const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
-    document.getElementById("ui_screen_text_l1").style.textDecoration = 'none';
-    document.getElementById("ui_screen_text_l2").style.textDecoration = 'none';
-    document.getElementById("ui_screen_text_l3").style.textDecoration = 'none';
+    if (uiScreenTextL1) uiScreenTextL1.style.textDecoration = 'none';
+    if (uiScreenTextL2) uiScreenTextL2.style.textDecoration = 'none';
+    if (uiScreenTextL3) uiScreenTextL3.style.textDecoration = 'none';
 
-    if(set_to_boot_screen){
-        document.getElementById("ui_screen_text_l1").innerText = 'e7a7e6';
-        document.getElementById("ui_screen_text_l2").innerText = 'a7e6c0';
-        document.getElementById("ui_screen_text_l3").innerText = '13e389';
-
+    if (setToBootScreen) {
+        if (uiScreenTextL1) uiScreenTextL1.innerText = 'e7a7e6';
+        if (uiScreenTextL2) uiScreenTextL2.innerText = 'a7e6c0';
+        if (uiScreenTextL3) uiScreenTextL3.innerText = '13e389';
     } else {
-        document.getElementById("ui_screen_text_l1").innerText = '';
-        document.getElementById("ui_screen_text_l2").innerText = '';
-        document.getElementById("ui_screen_text_l3").innerText = '';
-
+        if (uiScreenTextL1) uiScreenTextL1.innerText = '';
+        if (uiScreenTextL2) uiScreenTextL2.innerText = '';
+        if (uiScreenTextL3) uiScreenTextL3.innerText = '';
     }
 }
 
-function launch_device() {
-    
-    if (load_screen_state == 0){
-        load_screen_state += 1;
-        document.getElementById("ui_screen_text_l1").innerText = 'crypto'
-    } else if(load_screen_state == 1){                          
-        load_screen_state += 1;
-        document.getElementById("ui_screen_text_l2").innerText = 'grapha'
-    } else if(load_screen_state == 2){
-        load_screen_state += 1;
-        document.getElementById("ui_screen_text_l3").innerText = 'gotchi'
-    } else if(load_screen_state == 3){
-        load_screen_state += 1; //important for reloading this script
-        document.getElementById("ui_screen_text_l1").innerText = 'sign in';
-        document.getElementById("ui_screen_text_l2").innerText = 'sign up';
-         document.getElementById("ui_screen_text_l3").innerText = '';
-         login_screen_state = 2
-         login_screen_selector()
-        game_state = 1
-    }else if (load_screen_state > 3){
-        load_screen_state = 0;
-        reset_screen_text(true)
-    }console.log(game_state)
-}
-
-function login_screen_selector(){ 
-    document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'none'
-    if (login_screen_state == 1 ) {
-        login_screen_state = 2
-    } else {
-        login_screen_state = 1
-    };
-    document.getElementById("ui_screen_text_l" + String(login_screen_state)).style.textDecoration = 'underline'
-}
-
-function update_selector(selector,min_value,max_value) { 
-    if (selector < max_value){
-        selector++
-    } else {
-        selector = min_value
+function launchDevice(): void {
+    switch (loadScreenState) {
+        case 0:
+            loadScreenState++;
+            setText('ui_screen_text_l1', 'crypto');
+            break;
+        case 1:
+            loadScreenState++;
+            setText('ui_screen_text_l2', 'grapha');
+            break;
+        case 2:
+            loadScreenState++;
+            setText('ui_screen_text_l3', 'gotchi');
+            break;
+        case 3:
+            loadScreenState++;
+            setText('ui_screen_text_l1', 'sign in');
+            setText('ui_screen_text_l2', 'sign up');
+            loginScreenState = 2;
+            loginScreenSelector();
+            gameState = 1;
+            break;
+        default:
+            loadScreenState = 0;
+            resetScreenText(true);
+            break;
     }
-}  
+}
+
+function loginScreenSelector(): void {
+    const currentLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
+    if (currentLoginScreenText) currentLoginScreenText.style.textDecoration = 'underline';
+
+    loginScreenState = loginScreenState === 1 ? 2 : 1;
+    const newLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
+    if (newLoginScreenText) newLoginScreenText.style.textDecoration = 'none';
+}
+
+function updateSelector(selector: number, minValue: number, maxValue: number): number {
+    return selector < maxValue ? selector + 1 : minValue;
+}
 
 // STATE 1
 
-function launch_sign_in(){
-    reset_screen_text(false)
+function launchSignIn(): void {
+    resetScreenText(false);
 }
 
-function launch_sign_up(){
-    reset_screen_text(false)
+function launchSignUp(): void {
+    resetScreenText(false);
 }
 
+// STATE 2
 
-// STATE 2 
-
-function decrypt(){
-    console.log('decrypt')
-    reset_screen_text(false)
+function decryptData(): void {
+    console.log('decrypt');
+    resetScreenText(false);
 }
 
-function generate_new_egg(){
-    console.log('generate new egg')
-    reset_screen_text(false)
+function generateNewEgg(): void {
+    console.log('generate new egg');
+    resetScreenText(false);
 }
 
-//button functions
+// Button functions
 
-function button_a() {
-    //if (game_state == 0){launch_device()}
-    if (game_state == 1){login_screen_selector()};
-
-    document.getElementById('a').style.backgroundColor = '#f1f8d4ff';
-
-    if (debug == true){document.getElementById("debug").innerText = 'select'}
-};
-
-function button_b() {
-    if (game_state == 0){launch_device()}
-
-    else if (game_state == 1){ //
-        if (login_screen_state == 1){
-            game_state = 2
-            launch_sign_in()
-        } else if (login_screen_state == 2){
-            game_state = 3
-            launch_sign_up()
-        };}
-    else if (game_state == 2){ //sign in menu
-        
+function buttonA(): void {
+    if (gameState === 1) {
+        loginScreenSelector();
     }
 
-    document.getElementById('b').style.backgroundColor = '#f1f8d4ff';
+    setBackgroundColor('a', '#f1f8d4ff');
 
-    if (debug == true){document.getElementById("debug").innerText = 'execute'}
-};
+    if (debugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `select - ${gameState.toString()}`;
+    }
+}
 
-function button_c() {
-    //if (game_state == 0){launch_device()}
-    if (game_state == 1){game_state -= 1;launch_device()}
-    else if (game_state == 2 || game_state == 3){game_state = 0;load_screen_state = 3,launch_device()};
+function buttonB(): void {
+    if (gameState === 0) {
+        launchDevice();
+    } else if (gameState === 1) {
+        if (loginScreenState === 1) {
+            gameState = 2;
+            launchSignIn();
+        } else if (loginScreenState === 2) {
+            gameState = 3;
+            launchSignUp();
+        }
+    } else if (gameState === 2) {
+        // Sign in menu
+    }
 
-    document.getElementById('c').style.backgroundColor = '#f1f8d4ff';
+    setBackgroundColor('b', '#f1f8d4ff');
 
-    if (debug == true){document.getElementById("debug").innerText = 'cancel'}
-};
+    if (debugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `execute - ${gameState.toString()}`;
+    }
+}
 
-//REST API FUNCTIONS
-function getAllUsers() {
+function buttonC(): void {
+    if (gameState === 1) {
+        gameState--;
+        launchDevice();
+    } else if (gameState === 2 || gameState === 3) {
+        gameState = 0;
+        loadScreenState = 3;
+        launchDevice();
+    }
+
+    setBackgroundColor('c', '#f1f8d4ff');
+
+    if (debugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `cancel - ${gameState.toString()}`;
+    }
+}
+
+// REST API FUNCTIONS
+
+function fetchUsers(): void {
     fetch('/api/users')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             console.log('All Users:', data);
         })
         .catch(error => console.error('Error fetching users:', error));
 }
 
-function getUserByUsername(username) {
+function fetchUserByUsername(username: string): void {
     fetch(`/api/users/${btoa(username)}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('User:', data);
-    })
-    .catch(error => console.error('Error fetching user:', error));
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('User:', data);
+        })
+        .catch(error => console.error('Error fetching user:', error));
 }
 
-function postUser(username){
-    fetch('/api/users',{
+function createUser(username: string): void {
+    fetch('/api/users', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name: btoa(username)})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: btoa(username) })
     })
-    .then(res => {
-        return res.json()
-    })
-    .then(data => console.log(data))
-    .catch(error => console.log('ERROR', error))
+        .then(res => {
+            return res.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('ERROR', error));
+}
+
+function setText(elementId: string, text: string): void {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerText = text;
+    }
 }

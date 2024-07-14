@@ -119,7 +119,7 @@ function launch_device() {
     }else if (load_screen_state > 3){
         load_screen_state = 0;
         reset_screen_text(true)
-    }console.log(game_state)
+    }
 }
 
 function login_screen_selector(){ 
@@ -171,7 +171,7 @@ function button_a() {
 
     document.getElementById('a').style.backgroundColor = '#f1f8d4ff';
 
-    if (debug == true){document.getElementById("debug").innerText = 'select'}
+    if (debug == true){document.getElementById("debug").innerText = `select - ${game_state.toString()}`} 
 };
 
 function button_b() {
@@ -191,7 +191,7 @@ function button_b() {
 
     document.getElementById('b').style.backgroundColor = '#f1f8d4ff';
 
-    if (debug == true){document.getElementById("debug").innerText = 'execute'}
+    if (debug == true){document.getElementById("debug").innerText = `execute - ${game_state.toString()}`}
 };
 
 function button_c() {
@@ -201,7 +201,7 @@ function button_c() {
 
     document.getElementById('c').style.backgroundColor = '#f1f8d4ff';
 
-    if (debug == true){document.getElementById("debug").innerText = 'cancel'}
+    if (debug == true){document.getElementById("debug").innerText = `cancel - ${game_state.toString()}`}
 };
 
 //REST API FUNCTIONS
