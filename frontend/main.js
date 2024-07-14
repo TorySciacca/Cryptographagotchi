@@ -1,14 +1,13 @@
+console.log('test')
 var debug = true //bool to determine if debug mode is on/off
 
-function set_debug(set_debug) {
-    debug = set_debug
-
-    if (debug) {
+function set_debug(debugMode) {
+    if (debugMode) {
         document.getElementById("debug").innerText = 'debug on';
     } else {
-        document.getElementById("debug").innerText = ' ';
+        document.getElementById("debug").innerText = '';
     }
-};
+}
 
 function init_debug(){
     if(window.location.href.indexOf("GitHub")) // If the URL is in a github folder location, then user is likely a dev
@@ -65,8 +64,10 @@ function map_keyboard_shortcuts() { //alternative way of interacting with UI
 }
 
 function on_start() {
+    document.addEventListener('DOMContentLoaded', function() {
     init_debug()
     map_keyboard_shortcuts() 
+    });
 };
 
 on_start()
