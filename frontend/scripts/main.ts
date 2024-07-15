@@ -97,13 +97,14 @@ let loadScreenState: number = 0;
 let loginScreenState: number = 1;
 
 function resetScreenText(setToBootScreen: boolean): void {
+
     const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
-    if (uiScreenTextL1) uiScreenTextL1.style.textDecoration = 'none';
-    if (uiScreenTextL2) uiScreenTextL2.style.textDecoration = 'none';
-    if (uiScreenTextL3) uiScreenTextL3.style.textDecoration = 'none';
+    if (uiScreenTextL1) {uiScreenTextL1.style.color = SELECT_COLOUR; uiScreenTextL1.style.backgroundColor = INITIAL_COLOUR;}
+    if (uiScreenTextL2) {uiScreenTextL2.style.color = SELECT_COLOUR; uiScreenTextL2.style.backgroundColor = INITIAL_COLOUR;}
+    if (uiScreenTextL3) {uiScreenTextL3.style.color = SELECT_COLOUR; uiScreenTextL3.style.backgroundColor = INITIAL_COLOUR;}
 
     if (setToBootScreen) {
         if (uiScreenTextL1) uiScreenTextL1.innerText = 'e7a7e6';
@@ -133,8 +134,8 @@ function launchDevice(): void {
         case 3:
             loadScreenState++;
             resetScreenText(false);
-            setText('ui_screen_text_l1', 'sign in');
-            setText('ui_screen_text_l2', 'sign up');
+            setText('ui_screen_text_l1', 'decrypt');
+            setText('ui_screen_text_l2', 'new egg');
             loginScreenState = 2;
             loginScreenSelector();
             gameState = 1;
