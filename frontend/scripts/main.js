@@ -87,8 +87,10 @@ function onStart() {
 onStart();
 //
 var gameState = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
-var loadScreenState = 0;
+//let hasBooted: boolean = false
+var bootScreenState = 0;
 var loginScreenState = 1;
+var DEFAULT_FONT_SIZE = "3.4vh";
 function resetScreenText(setToBootScreen) {
     var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
@@ -96,14 +98,17 @@ function resetScreenText(setToBootScreen) {
     if (uiScreenTextL1) {
         uiScreenTextL1.style.color = SELECT_COLOUR;
         uiScreenTextL1.style.backgroundColor = INITIAL_COLOUR;
+        uiScreenTextL1.style.fontSize = DEFAULT_FONT_SIZE;
     }
     if (uiScreenTextL2) {
         uiScreenTextL2.style.color = SELECT_COLOUR;
         uiScreenTextL2.style.backgroundColor = INITIAL_COLOUR;
+        uiScreenTextL2.style.fontSize = DEFAULT_FONT_SIZE;
     }
     if (uiScreenTextL3) {
         uiScreenTextL3.style.color = SELECT_COLOUR;
         uiScreenTextL3.style.backgroundColor = INITIAL_COLOUR;
+        uiScreenTextL3.style.fontSize = DEFAULT_FONT_SIZE;
     }
     if (setToBootScreen) {
         if (uiScreenTextL1)
@@ -124,21 +129,27 @@ function resetScreenText(setToBootScreen) {
 }
 ;
 function launchDevice() {
-    switch (loadScreenState) {
+    switch (bootScreenState) {
         case 0:
-            loadScreenState++;
-            setText('ui_screen_text_l1', 'crypto');
+            bootScreenState++;
+            resetScreenText(true);
             break;
         case 1:
-            loadScreenState++;
-            setText('ui_screen_text_l2', 'grapha');
+            bootScreenState++;
+            setText('ui_screen_text_l1', 'crypto');
+            setText('ui_screen_text_l2', 'a7e6c0');
             break;
         case 2:
-            loadScreenState++;
-            setText('ui_screen_text_l3', 'gotchi');
+            bootScreenState++;
+            setText('ui_screen_text_l2', 'grapha');
+            setText('ui_screen_text_l3', '13e389');
             break;
         case 3:
-            loadScreenState++;
+            bootScreenState++;
+            setText('ui_screen_text_l3', 'gotchi');
+            break;
+        case 4:
+            bootScreenState++;
             resetScreenText(false);
             setText('ui_screen_text_l1', 'decrypt');
             setText('ui_screen_text_l2', 'new egg');
@@ -147,7 +158,7 @@ function launchDevice() {
             gameState = 1;
             break;
         default:
-            loadScreenState = 0;
+            bootScreenState = 0;
             resetScreenText(true);
             break;
     }
@@ -174,6 +185,13 @@ function updateSelector(selector, minValue, maxValue) {
 // STATE 1
 function launchSignIn() {
     resetScreenText(false);
+    setText('ui_screen_text_l1', 'username');
+    setText('ui_screen_text_l2', '***');
+    setText('ui_screen_text_l3', '');
+    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        uiScreenTextL2.style.fontSize = '5.5vh';
+    }
 }
 ;
 function launchSignUp() {
@@ -230,13 +248,19 @@ function buttonB() {
 }
 ;
 function buttonC() {
-    if (gameState === 1) {
+    if (gameState === 0) {
+        bootScreenState--;
+        bootScreenState--;
+        launchDevice();
+    }
+    else if (gameState === 1) {
         gameState--;
+        bootScreenState = 0;
         launchDevice();
     }
     else if (gameState === 2 || gameState === 3) {
-        gameState = 0;
-        loadScreenState = 3;
+        gameState--;
+        bootScreenState = 4;
         launchDevice();
     }
     setBackgroundColor('c', '#f1f8d4ff');
