@@ -1,4 +1,29 @@
+// Global variables
+let gameState: number = 0;
+let bootScreenState: number = 0;
+let loginScreenState: number = 1;
+let decryptState: number = 0;
+
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
+
+// Constants
+const SELECT_COLOUR: string = '#241f21ff';
+const INITIAL_COLOUR: string = '#f1f8d4ff';
+const DEFAULT_FONT_SIZE = "3.4vh";
+
+// Initialization
+function onStart(): void {
+    document.addEventListener('DOMContentLoaded', () => {
+        initDebug();
+        mapKeyboardShortcuts();
+    });
+};
+
+onStart();
+
+function initDebug(): void {
+    setDebug(window.location.href.indexOf("GitHub") !== -1);
+};
 
 function setDebug(gameDebugMode: boolean): void {
     const debugElement = document.getElementById("debug");
@@ -7,17 +32,15 @@ function setDebug(gameDebugMode: boolean): void {
     }
 };
 
-function initDebug(): void {
-    if (window.location.href.indexOf("GitHub") !== -1) { // Check for GitHub in the URL
-        setDebug(true);
-    } else {
-        setDebug(false);
+// Debugging utility
+function updateDebugMessage(message: string): void {
+    if (gameDebugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = message;
     }
-};
+}
 
-// Init and mapping functions
-const SELECT_COLOUR: string = '#241f21ff';
-const INITIAL_COLOUR: string = '#f1f8d4ff';
+// Keyboard mapping 
 
 function mapKeyboardShortcuts(): void {
 
@@ -74,6 +97,7 @@ function mapKeyboardShortcuts(): void {
     });
 };
 
+// UI Manipulation
 function setBackgroundColor(elementId: string, color: string): void {
     const element = document.getElementById(elementId);
     if (element) {
@@ -81,24 +105,12 @@ function setBackgroundColor(elementId: string, color: string): void {
     }
 };
 
-function onStart(): void {
-    document.addEventListener('DOMContentLoaded', () => {
-        initDebug();
-        mapKeyboardShortcuts();
-    });
+function setText(elementId: string, text: string): void {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerText = text;
+    }
 };
-
-onStart();
-
-//
-
-let gameState: number = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
-//let hasBooted: boolean = false
-let bootScreenState: number = 0;
-let loginScreenState: number = 1;
-let decryptState: number = 0; // character selected (limit of 8)
-
-const DEFAULT_FONT_SIZE = "3.4vh"
 
 function resetScreenText(setToBootScreen: boolean): void {
 
@@ -120,6 +132,8 @@ function resetScreenText(setToBootScreen: boolean): void {
         if (uiScreenTextL3) uiScreenTextL3.innerText = '';
     }
 };
+
+// State management
 
 function launchDevice(): void {
     switch (bootScreenState) {
@@ -174,6 +188,77 @@ function loginScreenSelector(): void {
 
 function updateSelector(selector: number, minValue: number, maxValue: number): number {
     return selector < maxValue ? selector + 1 : minValue;
+};
+
+
+function buttonA(): void {
+    if (gameState === 1) {
+        loginScreenSelector();
+    } else if (gameState === 2){
+        inputLetters('a')
+    }
+
+    setBackgroundColor('a', '#f1f8d4ff');
+
+    if (gameDebugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `select - ${gameState.toString()}`;
+    }
+};
+
+function buttonB(): void {
+    if (gameState === 0) {
+        launchDevice();
+    } else if (gameState === 1) {
+        if (loginScreenState === 1) {
+            gameState = 2;
+            launchSignIn();
+        } else if (loginScreenState === 2) {
+            gameState = 3;
+            launchSignUp();
+        }
+    } else if (gameState === 2) {
+        inputLetters('b') // Sign in menu
+    }
+
+    setBackgroundColor('b', '#f1f8d4ff');
+
+    if (gameDebugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `execute - ${gameState.toString()}`;
+    }
+};
+
+function buttonC(): void {
+    if(gameState === 0){
+        bootScreenState --;
+        bootScreenState --;
+        launchDevice();
+    }else if (gameState === 1) {
+        gameState--;
+        bootScreenState = 0;
+        launchDevice();
+    } else if (gameState === 2) {
+        if (decryptState != 0){
+            inputLetters('c')
+        } else {
+            gameState --;
+            bootScreenState = 4;
+            launchDevice();
+        }
+
+    } else if(gameState === 3) {
+        gameState --;
+        bootScreenState = 4;
+        launchDevice();
+    }
+
+    setBackgroundColor('c', '#f1f8d4ff');
+
+    if (gameDebugMode) {
+        const debugElement = document.getElementById("debug");
+        if (debugElement) debugElement.innerText = `cancel - ${gameState.toString()}`;
+    }
 };
 
 // STATE 1
@@ -257,78 +342,6 @@ function generateNewEgg(): void {
     resetScreenText(false);
 };
 
-// Button functions
-
-function buttonA(): void {
-    if (gameState === 1) {
-        loginScreenSelector();
-    } else if (gameState === 2){
-        inputLetters('a')
-    }
-
-    setBackgroundColor('a', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `select - ${gameState.toString()}`;
-    }
-};
-
-function buttonB(): void {
-    if (gameState === 0) {
-        launchDevice();
-    } else if (gameState === 1) {
-        if (loginScreenState === 1) {
-            gameState = 2;
-            launchSignIn();
-        } else if (loginScreenState === 2) {
-            gameState = 3;
-            launchSignUp();
-        }
-    } else if (gameState === 2) {
-        inputLetters('b') // Sign in menu
-    }
-
-    setBackgroundColor('b', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `execute - ${gameState.toString()}`;
-    }
-};
-
-function buttonC(): void {
-    if(gameState === 0){
-        bootScreenState --;
-        bootScreenState --;
-        launchDevice();
-    }else if (gameState === 1) {
-        gameState--;
-        bootScreenState = 0;
-        launchDevice();
-    } else if (gameState === 2) {
-        if (decryptState != 0){
-            inputLetters('c')
-        } else {
-            gameState --;
-            bootScreenState = 4;
-            launchDevice();
-        }
-
-    } else if(gameState === 3) {
-        gameState --;
-        bootScreenState = 4;
-        launchDevice();
-    }
-
-    setBackgroundColor('c', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `cancel - ${gameState.toString()}`;
-    }
-};
-
 // REST API FUNCTIONS
 
 function fetchUsers(): void {
@@ -370,11 +383,4 @@ function createUser(username: string): void {
         })
         .then(data => console.log(data))
         .catch(error => console.error('ERROR', error));
-};
-
-function setText(elementId: string, text: string): void {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.innerText = text;
-    }
 };

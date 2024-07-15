@@ -7,7 +7,29 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+// Global variables
+var gameState = 0;
+var bootScreenState = 0;
+var loginScreenState = 1;
+var decryptState = 0;
 var gameDebugMode = true; // bool to determine if debug mode is on/off
+// Constants
+var SELECT_COLOUR = '#241f21ff';
+var INITIAL_COLOUR = '#f1f8d4ff';
+var DEFAULT_FONT_SIZE = "3.4vh";
+// Initialization
+function onStart() {
+    document.addEventListener('DOMContentLoaded', function () {
+        initDebug();
+        mapKeyboardShortcuts();
+    });
+}
+;
+onStart();
+function initDebug() {
+    setDebug(window.location.href.indexOf("GitHub") !== -1);
+}
+;
 function setDebug(gameDebugMode) {
     var debugElement = document.getElementById("debug");
     if (debugElement) {
@@ -15,18 +37,15 @@ function setDebug(gameDebugMode) {
     }
 }
 ;
-function initDebug() {
-    if (window.location.href.indexOf("GitHub") !== -1) { // Check for GitHub in the URL
-        setDebug(true);
-    }
-    else {
-        setDebug(false);
+// Debugging utility
+function updateDebugMessage(message) {
+    if (gameDebugMode) {
+        var debugElement = document.getElementById("debug");
+        if (debugElement)
+            debugElement.innerText = message;
     }
 }
-;
-// Init and mapping functions
-var SELECT_COLOUR = '#241f21ff';
-var INITIAL_COLOUR = '#f1f8d4ff';
+// Keyboard mapping 
 function mapKeyboardShortcuts() {
     window.addEventListener('keydown', function (event) {
         switch (event.key) {
@@ -79,6 +98,7 @@ function mapKeyboardShortcuts() {
     });
 }
 ;
+// UI Manipulation
 function setBackgroundColor(elementId, color) {
     var element = document.getElementById(elementId);
     if (element) {
@@ -86,21 +106,13 @@ function setBackgroundColor(elementId, color) {
     }
 }
 ;
-function onStart() {
-    document.addEventListener('DOMContentLoaded', function () {
-        initDebug();
-        mapKeyboardShortcuts();
-    });
+function setText(elementId, text) {
+    var element = document.getElementById(elementId);
+    if (element) {
+        element.innerText = text;
+    }
 }
 ;
-onStart();
-//
-var gameState = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
-//let hasBooted: boolean = false
-var bootScreenState = 0;
-var loginScreenState = 1;
-var decryptState = 0; // character selected (limit of 8)
-var DEFAULT_FONT_SIZE = "3.4vh";
 function resetScreenText(setToBootScreen) {
     var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
@@ -138,6 +150,7 @@ function resetScreenText(setToBootScreen) {
     }
 }
 ;
+// State management
 function launchDevice() {
     switch (bootScreenState) {
         case 0:
@@ -190,6 +203,80 @@ function loginScreenSelector() {
 ;
 function updateSelector(selector, minValue, maxValue) {
     return selector < maxValue ? selector + 1 : minValue;
+}
+;
+function buttonA() {
+    if (gameState === 1) {
+        loginScreenSelector();
+    }
+    else if (gameState === 2) {
+        inputLetters('a');
+    }
+    setBackgroundColor('a', '#f1f8d4ff');
+    if (gameDebugMode) {
+        var debugElement = document.getElementById("debug");
+        if (debugElement)
+            debugElement.innerText = "select - ".concat(gameState.toString());
+    }
+}
+;
+function buttonB() {
+    if (gameState === 0) {
+        launchDevice();
+    }
+    else if (gameState === 1) {
+        if (loginScreenState === 1) {
+            gameState = 2;
+            launchSignIn();
+        }
+        else if (loginScreenState === 2) {
+            gameState = 3;
+            launchSignUp();
+        }
+    }
+    else if (gameState === 2) {
+        inputLetters('b'); // Sign in menu
+    }
+    setBackgroundColor('b', '#f1f8d4ff');
+    if (gameDebugMode) {
+        var debugElement = document.getElementById("debug");
+        if (debugElement)
+            debugElement.innerText = "execute - ".concat(gameState.toString());
+    }
+}
+;
+function buttonC() {
+    if (gameState === 0) {
+        bootScreenState--;
+        bootScreenState--;
+        launchDevice();
+    }
+    else if (gameState === 1) {
+        gameState--;
+        bootScreenState = 0;
+        launchDevice();
+    }
+    else if (gameState === 2) {
+        if (decryptState != 0) {
+            inputLetters('c');
+        }
+        else {
+            gameState--;
+            bootScreenState = 4;
+            launchDevice();
+        }
+    }
+    else if (gameState === 3) {
+        gameState--;
+        bootScreenState = 4;
+        launchDevice();
+    }
+    setBackgroundColor('c', '#f1f8d4ff');
+    if (gameDebugMode) {
+        var debugElement = document.getElementById("debug");
+        if (debugElement)
+            debugElement.innerText = "cancel - ".concat(gameState.toString());
+    }
 }
 ;
 // STATE 1
@@ -266,81 +353,6 @@ function generateNewEgg() {
     resetScreenText(false);
 }
 ;
-// Button functions
-function buttonA() {
-    if (gameState === 1) {
-        loginScreenSelector();
-    }
-    else if (gameState === 2) {
-        inputLetters('a');
-    }
-    setBackgroundColor('a', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "select - ".concat(gameState.toString());
-    }
-}
-;
-function buttonB() {
-    if (gameState === 0) {
-        launchDevice();
-    }
-    else if (gameState === 1) {
-        if (loginScreenState === 1) {
-            gameState = 2;
-            launchSignIn();
-        }
-        else if (loginScreenState === 2) {
-            gameState = 3;
-            launchSignUp();
-        }
-    }
-    else if (gameState === 2) {
-        inputLetters('b'); // Sign in menu
-    }
-    setBackgroundColor('b', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "execute - ".concat(gameState.toString());
-    }
-}
-;
-function buttonC() {
-    if (gameState === 0) {
-        bootScreenState--;
-        bootScreenState--;
-        launchDevice();
-    }
-    else if (gameState === 1) {
-        gameState--;
-        bootScreenState = 0;
-        launchDevice();
-    }
-    else if (gameState === 2) {
-        if (decryptState != 0) {
-            inputLetters('c');
-        }
-        else {
-            gameState--;
-            bootScreenState = 4;
-            launchDevice();
-        }
-    }
-    else if (gameState === 3) {
-        gameState--;
-        bootScreenState = 4;
-        launchDevice();
-    }
-    setBackgroundColor('c', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "cancel - ".concat(gameState.toString());
-    }
-}
-;
 // REST API FUNCTIONS
 function fetchUsers() {
     fetch('/api/users')
@@ -381,12 +393,5 @@ function createUser(username) {
     })
         .then(function (data) { return console.log(data); })
         .catch(function (error) { return console.error('ERROR', error); });
-}
-;
-function setText(elementId, text) {
-    var element = document.getElementById(elementId);
-    if (element) {
-        element.innerText = text;
-    }
 }
 ;
