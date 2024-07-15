@@ -200,8 +200,6 @@ function inputLetters(buttonType:string){
     
     if (uiScreenTextL2) {
         if (buttonType === 'a'){
-            
-            console.log(decryptState,uiScreenTextL2.innerText,uiScreenTextL2.innerText[decryptState])
             let newChar = uiScreenTextL2.innerText[decryptState];
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
             uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
@@ -213,7 +211,8 @@ function inputLetters(buttonType:string){
                 fetchUserByUsername(uiScreenTextL2.innerText)
             }
         } else if (buttonType === 'c'){
-            //
+            decryptState --;
+            uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
         };
     }
 }
@@ -308,10 +307,14 @@ function buttonC(): void {
         bootScreenState = 0;
         launchDevice();
     } else if (gameState === 2) {
-        gameState --;
-        bootScreenState = 4;
-        launchDevice();
-        decryptState = 0;
+        if (decryptState != 0){
+            inputLetters('c')
+        } else {
+            gameState --;
+            bootScreenState = 4;
+            launchDevice();
+        }
+
     } else if(gameState === 3) {
         gameState --;
         bootScreenState = 4;

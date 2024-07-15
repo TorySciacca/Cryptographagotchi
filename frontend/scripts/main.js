@@ -212,7 +212,6 @@ function inputLetters(buttonType) {
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
         if (buttonType === 'a') {
-            console.log(decryptState, uiScreenTextL2.innerText, uiScreenTextL2.innerText[decryptState]);
             var newChar = uiScreenTextL2.innerText[decryptState];
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
             uiScreenTextL2.innerText += circularCharacter(newChar, 'forward');
@@ -227,7 +226,8 @@ function inputLetters(buttonType) {
             }
         }
         else if (buttonType === 'c') {
-            //
+            decryptState--;
+            uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
         }
         ;
     }
@@ -319,10 +319,14 @@ function buttonC() {
         launchDevice();
     }
     else if (gameState === 2) {
-        gameState--;
-        bootScreenState = 4;
-        launchDevice();
-        decryptState = 0;
+        if (decryptState != 0) {
+            inputLetters('c');
+        }
+        else {
+            gameState--;
+            bootScreenState = 4;
+            launchDevice();
+        }
     }
     else if (gameState === 3) {
         gameState--;
