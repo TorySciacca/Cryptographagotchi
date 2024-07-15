@@ -16,10 +16,10 @@ function initDebug(): void {
 };
 
 // Init and mapping functions
+const SELECT_COLOUR: string = '#241f21ff';
+const INITIAL_COLOUR: string = '#f1f8d4ff';
 
 function mapKeyboardShortcuts(): void {
-    const SELECT_COLOUR: string = '#241f21ff';
-    const INITIAL_COLOUR: string = '#f1f8d4ff';
 
     window.addEventListener('keydown', (event: KeyboardEvent) => {
         switch (event.key) {
@@ -132,6 +132,7 @@ function launchDevice(): void {
             break;
         case 3:
             loadScreenState++;
+            resetScreenText(false);
             setText('ui_screen_text_l1', 'sign in');
             setText('ui_screen_text_l2', 'sign up');
             loginScreenState = 2;
@@ -147,11 +148,17 @@ function launchDevice(): void {
 
 function loginScreenSelector(): void {
     const currentLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
-    if (currentLoginScreenText) currentLoginScreenText.style.textDecoration = 'underline';
-
+    if (currentLoginScreenText) {
+        currentLoginScreenText.style.color = SELECT_COLOUR; // light
+        currentLoginScreenText.style.backgroundColor = INITIAL_COLOUR // dark
+    }
+    
     loginScreenState = loginScreenState === 1 ? 2 : 1;
     const newLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
-    if (newLoginScreenText) newLoginScreenText.style.textDecoration = 'none';
+    if (newLoginScreenText) {
+        newLoginScreenText.style.color = INITIAL_COLOUR; // dark
+        newLoginScreenText.style.backgroundColor = SELECT_COLOUR; // light
+    }
 };
 
 function updateSelector(selector: number, minValue: number, maxValue: number): number {
