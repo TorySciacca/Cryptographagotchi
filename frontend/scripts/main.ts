@@ -1,11 +1,11 @@
-let debugMode: boolean = true; // bool to determine if debug mode is on/off
+let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
-function setDebug(debugMode: boolean): void {
+function setDebug(gameDebugMode: boolean): void {
     const debugElement = document.getElementById("debug");
     if (debugElement) {
-        debugElement.innerText = debugMode ? 'debug on' : '';
+        debugElement.innerText = gameDebugMode ? 'debug on' : '';
     }
-}
+};
 
 function initDebug(): void {
     if (window.location.href.indexOf("GitHub") !== -1) { // Check for GitHub in the URL
@@ -13,7 +13,7 @@ function initDebug(): void {
     } else {
         setDebug(false);
     }
-}
+};
 
 // Init and mapping functions
 
@@ -72,21 +72,21 @@ function mapKeyboardShortcuts(): void {
         setBackgroundColor('b', SELECT_COLOUR);
         setBackgroundColor('c', SELECT_COLOUR);
     });
-}
+};
 
 function setBackgroundColor(elementId: string, color: string): void {
     const element = document.getElementById(elementId);
     if (element) {
         element.style.backgroundColor = color;
     }
-}
+};
 
 function onStart(): void {
     document.addEventListener('DOMContentLoaded', () => {
         initDebug();
         mapKeyboardShortcuts();
     });
-}
+};
 
 onStart();
 
@@ -114,7 +114,7 @@ function resetScreenText(setToBootScreen: boolean): void {
         if (uiScreenTextL2) uiScreenTextL2.innerText = '';
         if (uiScreenTextL3) uiScreenTextL3.innerText = '';
     }
-}
+};
 
 function launchDevice(): void {
     switch (loadScreenState) {
@@ -143,7 +143,7 @@ function launchDevice(): void {
             resetScreenText(true);
             break;
     }
-}
+};
 
 function loginScreenSelector(): void {
     const currentLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
@@ -152,33 +152,33 @@ function loginScreenSelector(): void {
     loginScreenState = loginScreenState === 1 ? 2 : 1;
     const newLoginScreenText = document.getElementById("ui_screen_text_l" + String(loginScreenState));
     if (newLoginScreenText) newLoginScreenText.style.textDecoration = 'none';
-}
+};
 
 function updateSelector(selector: number, minValue: number, maxValue: number): number {
     return selector < maxValue ? selector + 1 : minValue;
-}
+};
 
 // STATE 1
 
 function launchSignIn(): void {
     resetScreenText(false);
-}
+};
 
 function launchSignUp(): void {
     resetScreenText(false);
-}
+};
 
 // STATE 2
 
 function decryptData(): void {
     console.log('decrypt');
     resetScreenText(false);
-}
+};
 
 function generateNewEgg(): void {
     console.log('generate new egg');
     resetScreenText(false);
-}
+};
 
 // Button functions
 
@@ -189,11 +189,11 @@ function buttonA(): void {
 
     setBackgroundColor('a', '#f1f8d4ff');
 
-    if (debugMode) {
+    if (gameDebugMode) {
         const debugElement = document.getElementById("debug");
         if (debugElement) debugElement.innerText = `select - ${gameState.toString()}`;
     }
-}
+};
 
 function buttonB(): void {
     if (gameState === 0) {
@@ -212,11 +212,11 @@ function buttonB(): void {
 
     setBackgroundColor('b', '#f1f8d4ff');
 
-    if (debugMode) {
+    if (gameDebugMode) {
         const debugElement = document.getElementById("debug");
         if (debugElement) debugElement.innerText = `execute - ${gameState.toString()}`;
     }
-}
+};
 
 function buttonC(): void {
     if (gameState === 1) {
@@ -230,11 +230,11 @@ function buttonC(): void {
 
     setBackgroundColor('c', '#f1f8d4ff');
 
-    if (debugMode) {
+    if (gameDebugMode) {
         const debugElement = document.getElementById("debug");
         if (debugElement) debugElement.innerText = `cancel - ${gameState.toString()}`;
     }
-}
+};
 
 // REST API FUNCTIONS
 
@@ -250,7 +250,7 @@ function fetchUsers(): void {
             console.log('All Users:', data);
         })
         .catch(error => console.error('Error fetching users:', error));
-}
+};
 
 function fetchUserByUsername(username: string): void {
     fetch(`/api/users/${btoa(username)}`)
@@ -264,7 +264,7 @@ function fetchUserByUsername(username: string): void {
             console.log('User:', data);
         })
         .catch(error => console.error('Error fetching user:', error));
-}
+};
 
 function createUser(username: string): void {
     fetch('/api/users', {
@@ -277,11 +277,11 @@ function createUser(username: string): void {
         })
         .then(data => console.log(data))
         .catch(error => console.error('ERROR', error));
-}
+};
 
 function setText(elementId: string, text: string): void {
     const element = document.getElementById(elementId);
     if (element) {
         element.innerText = text;
     }
-}
+};
