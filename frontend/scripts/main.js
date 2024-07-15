@@ -1,3 +1,12 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var gameDebugMode = true; // bool to determine if debug mode is on/off
 function setDebug(gameDebugMode) {
     var debugElement = document.getElementById("debug");
@@ -90,6 +99,7 @@ var gameState = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
 //let hasBooted: boolean = false
 var bootScreenState = 0;
 var loginScreenState = 1;
+var decryptState = 0; // character selected (limit of 8)
 var DEFAULT_FONT_SIZE = "3.4vh";
 function resetScreenText(setToBootScreen) {
     var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
@@ -186,7 +196,7 @@ function updateSelector(selector, minValue, maxValue) {
 function launchSignIn() {
     resetScreenText(false);
     setText('ui_screen_text_l1', 'username');
-    setText('ui_screen_text_l2', '***');
+    setText('ui_screen_text_l2', 'a');
     setText('ui_screen_text_l3', '');
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
@@ -198,6 +208,50 @@ function launchSignUp() {
     resetScreenText(false);
 }
 ;
+function inputLetters(buttonType) {
+    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        if (buttonType === 'a') {
+            console.log(decryptState, uiScreenTextL2.innerText, uiScreenTextL2.innerText[decryptState]);
+            var newChar = uiScreenTextL2.innerText[decryptState];
+            uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
+            uiScreenTextL2.innerText += circularCharacter(newChar, 'forward');
+        }
+        else if (buttonType === 'b') {
+            if (decryptState < 4) {
+                decryptState++;
+                uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a';
+            }
+        }
+        else if (buttonType === 'c') {
+            //
+        }
+        ;
+    }
+}
+function circularCharacter(char, direction) {
+    var validCharacters = __spreadArray([], Array(26), true).map(function (_, i) { return String.fromCharCode('a'.charCodeAt(0) + i); })
+        .concat(__spreadArray([], Array(10), true).map(function (_, i) { return String.fromCharCode('0'.charCodeAt(0) + i); }));
+    var lowerChar = char.toLowerCase();
+    var currentIndex = -1;
+    for (var i = 0; i < validCharacters.length; i++) {
+        if (validCharacters[i] === lowerChar) {
+            currentIndex = i;
+            break;
+        }
+    }
+    if (currentIndex === -1) {
+        return 'a'; // reset, Character not found in validCharacters
+    }
+    // Determine the next index based on direction
+    if (direction === 'forward') {
+        currentIndex = (currentIndex + 1) % validCharacters.length;
+    }
+    else if (direction === 'backward') {
+        currentIndex = (currentIndex - 1 + validCharacters.length) % validCharacters.length;
+    }
+    return validCharacters[currentIndex];
+}
 // STATE 2
 function decryptData() {
     console.log('decrypt');
@@ -213,6 +267,9 @@ function generateNewEgg() {
 function buttonA() {
     if (gameState === 1) {
         loginScreenSelector();
+    }
+    else if (gameState === 2) {
+        inputLetters('a');
     }
     setBackgroundColor('a', '#f1f8d4ff');
     if (gameDebugMode) {
@@ -237,6 +294,7 @@ function buttonB() {
         }
     }
     else if (gameState === 2) {
+        inputLetters('b');
         // Sign in menu
     }
     setBackgroundColor('b', '#f1f8d4ff');

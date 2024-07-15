@@ -96,6 +96,7 @@ let gameState: number = 0; // 0 - boot, 1 - login, 2 - decrypt, 3 - generate
 //let hasBooted: boolean = false
 let bootScreenState: number = 0;
 let loginScreenState: number = 1;
+let decryptState: number = 0; // character selected (limit of 8)
 
 const DEFAULT_FONT_SIZE = "3.4vh"
 
@@ -181,7 +182,7 @@ function launchSignIn(): void {
     resetScreenText(false);
 
     setText('ui_screen_text_l1', 'username');
-    setText('ui_screen_text_l2', '');
+    setText('ui_screen_text_l2', 'a');
     setText('ui_screen_text_l3', '');
 
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
@@ -193,6 +194,54 @@ function launchSignIn(): void {
 function launchSignUp(): void {
     resetScreenText(false);
 };
+
+function inputLetters(buttonType:string){
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    
+    if (uiScreenTextL2) {
+        if (buttonType === 'a'){
+            
+            console.log(decryptState,uiScreenTextL2.innerText,uiScreenTextL2.innerText[decryptState])
+            let newChar = uiScreenTextL2.innerText[decryptState];
+            uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
+            uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
+        } else if (buttonType === 'b'){
+            if (decryptState < 4) {
+            decryptState ++;
+            uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
+        } else if (buttonType === 'c'){
+            //
+        };
+    }
+}
+
+function circularCharacter(char: string, direction: 'forward' | 'backward'): string | string {
+    const validCharacters: string[] = [...Array(26)].map((_, i) => String.fromCharCode('a'.charCodeAt(0) + i))
+        .concat([...Array(10)].map((_, i) => String.fromCharCode('0'.charCodeAt(0) + i)));
+
+    const lowerChar = char.toLowerCase();
+    let currentIndex = -1;
+
+    for (let i = 0; i < validCharacters.length; i++) {
+        if (validCharacters[i] === lowerChar) {
+            currentIndex = i;
+            break;
+        }
+    }
+
+    if (currentIndex === -1) {
+        return 'a'; // reset, Character not found in validCharacters
+    }
+
+    // Determine the next index based on direction
+    if (direction === 'forward') {
+        currentIndex = (currentIndex + 1) % validCharacters.length;
+    } else if (direction === 'backward') {
+        currentIndex = (currentIndex - 1 + validCharacters.length) % validCharacters.length;
+    }
+
+    return validCharacters[currentIndex];
+}
 
 // STATE 2
 
@@ -211,6 +260,8 @@ function generateNewEgg(): void {
 function buttonA(): void {
     if (gameState === 1) {
         loginScreenSelector();
+    } else if (gameState === 2){
+        inputLetters('a')
     }
 
     setBackgroundColor('a', '#f1f8d4ff');
@@ -233,7 +284,7 @@ function buttonB(): void {
             launchSignUp();
         }
     } else if (gameState === 2) {
-
+        inputLetters('b')
         // Sign in menu
     }
 
