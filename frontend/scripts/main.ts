@@ -209,6 +209,9 @@ function inputLetters(buttonType:string){
             if (decryptState < 4) {
             decryptState ++;
             uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
+            else {
+                fetchUserByUsername(uiScreenTextL2.innerText)
+            }
         } else if (buttonType === 'c'){
             //
         };
@@ -218,8 +221,8 @@ function inputLetters(buttonType:string){
 function circularCharacter(char: string, direction: 'forward' | 'backward'): string | string {
     const validCharacters: string[] = [...Array(26)].map((_, i) => String.fromCharCode('a'.charCodeAt(0) + i))
         .concat([...Array(10)].map((_, i) => String.fromCharCode('0'.charCodeAt(0) + i)));
-
     const lowerChar = char.toLowerCase();
+
     let currentIndex = -1;
 
     for (let i = 0; i < validCharacters.length; i++) {
@@ -284,8 +287,7 @@ function buttonB(): void {
             launchSignUp();
         }
     } else if (gameState === 2) {
-        inputLetters('b')
-        // Sign in menu
+        inputLetters('b') // Sign in menu
     }
 
     setBackgroundColor('b', '#f1f8d4ff');
@@ -305,11 +307,16 @@ function buttonC(): void {
         gameState--;
         bootScreenState = 0;
         launchDevice();
-    } else if (gameState === 2 || gameState === 3) {
+    } else if (gameState === 2) {
         gameState --;
         bootScreenState = 4;
         launchDevice();
-    } 
+        decryptState = 0;
+    } else if(gameState === 3) {
+        gameState --;
+        bootScreenState = 4;
+        launchDevice();
+    }
 
     setBackgroundColor('c', '#f1f8d4ff');
 

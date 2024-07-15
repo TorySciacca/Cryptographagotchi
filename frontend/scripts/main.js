@@ -222,6 +222,9 @@ function inputLetters(buttonType) {
                 decryptState++;
                 uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a';
             }
+            else {
+                fetchUserByUsername(uiScreenTextL2.innerText);
+            }
         }
         else if (buttonType === 'c') {
             //
@@ -294,8 +297,7 @@ function buttonB() {
         }
     }
     else if (gameState === 2) {
-        inputLetters('b');
-        // Sign in menu
+        inputLetters('b'); // Sign in menu
     }
     setBackgroundColor('b', '#f1f8d4ff');
     if (gameDebugMode) {
@@ -316,7 +318,13 @@ function buttonC() {
         bootScreenState = 0;
         launchDevice();
     }
-    else if (gameState === 2 || gameState === 3) {
+    else if (gameState === 2) {
+        gameState--;
+        bootScreenState = 4;
+        launchDevice();
+        decryptState = 0;
+    }
+    else if (gameState === 3) {
         gameState--;
         bootScreenState = 4;
         launchDevice();
