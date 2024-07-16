@@ -1,8 +1,9 @@
 // Global variables
-let gameState: number = 0;
+let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up
 let bootScreenState: number = 0;
 let loginScreenState: number = 1;
 let decryptState: number = 0;
+let usernameState: number = 0;
 
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
@@ -190,12 +191,11 @@ function updateSelector(selector: number, minValue: number, maxValue: number): n
     return selector < maxValue ? selector + 1 : minValue;
 };
 
-
 function buttonA(): void {
     if (gameState === 1) {
         loginScreenSelector();
-    } else if (gameState === 2){
-        inputLetters('a')
+    } else if (gameState === 2 || gameState === 3){
+        decryptState = inputLetters('a',decryptState)
     }
 
     setBackgroundColor('a', '#f1f8d4ff');
@@ -217,8 +217,8 @@ function buttonB(): void {
             gameState = 3;
             launchSignUp();
         }
-    } else if (gameState === 2) {
-        inputLetters('b') // Sign in menu
+    } else if (gameState === 2 || gameState === 3) {
+        decryptState = inputLetters('b',decryptState) // Sign in menu
     }
 
     setBackgroundColor('b', '#f1f8d4ff');
@@ -238,9 +238,9 @@ function buttonC(): void {
         gameState--;
         bootScreenState = 0;
         launchDevice();
-    } else if (gameState === 2) {
+    } else if (gameState === 2 || gameState === 3) {
         if (decryptState != 0){
-            inputLetters('c')
+            decryptState = inputLetters('c',decryptState)
         } else {
             gameState --;
             bootScreenState = 4;
@@ -261,7 +261,7 @@ function buttonC(): void {
     }
 };
 
-// STATE 1
+// STATE 1 - Login 
 
 function launchSignIn(): void {
     resetScreenText(false);
@@ -278,31 +278,44 @@ function launchSignIn(): void {
 
 function launchSignUp(): void {
     resetScreenText(false);
+
+    setText('ui_screen_text_l1', 'username');
+    setText('ui_screen_text_l2', 'a');
+    setText('ui_screen_text_l3', '');
+
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2){
+        uiScreenTextL2.style.fontSize = '5.5vh';
+    }
 };
 
-function inputLetters(buttonType:string){
+// STATE 2 - User Login / 'Decrypt'
+
+function inputLetters(buttonType:string,inputState:number): number {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    
+    const characterLimit = 3
+
     if (uiScreenTextL2) {
         if (buttonType === 'a'){
-            let newChar = uiScreenTextL2.innerText[decryptState];
+            let newChar = uiScreenTextL2.innerText[inputState];
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
             uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
         } else if (buttonType === 'b'){
-            if (decryptState < 4) {
-            decryptState ++;
+            if (inputState < characterLimit) {
+                inputState ++;
             uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
             else {
                 fetchUserByUsername(uiScreenTextL2.innerText)
             }
         } else if (buttonType === 'c'){
-            decryptState --;
+            inputState --;
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
         };
     }
+    return inputState 
 }
 
-function circularCharacter(char: string, direction: 'forward' | 'backward'): string | string {
+function circularCharacter(char: string, direction: 'forward' | 'backward'): string {
     const validCharacters: string[] = [...Array(26)].map((_, i) => String.fromCharCode('a'.charCodeAt(0) + i))
         .concat([...Array(10)].map((_, i) => String.fromCharCode('0'.charCodeAt(0) + i)));
     const lowerChar = char.toLowerCase();
@@ -330,7 +343,7 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
     return validCharacters[currentIndex];
 }
 
-// STATE 2
+// STATE 3 - User Sign Up / 'Decrypt'
 
 function decryptData(): void {
     console.log('decrypt');

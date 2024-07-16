@@ -8,10 +8,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 // Global variables
-var gameState = 0;
+var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up
 var bootScreenState = 0;
 var loginScreenState = 1;
 var decryptState = 0;
+var usernameState = 0;
 var gameDebugMode = true; // bool to determine if debug mode is on/off
 // Constants
 var SELECT_COLOUR = '#241f21ff';
@@ -209,8 +210,8 @@ function buttonA() {
     if (gameState === 1) {
         loginScreenSelector();
     }
-    else if (gameState === 2) {
-        inputLetters('a');
+    else if (gameState === 2 || gameState === 3) {
+        decryptState = inputLetters('a', decryptState);
     }
     setBackgroundColor('a', '#f1f8d4ff');
     if (gameDebugMode) {
@@ -234,8 +235,8 @@ function buttonB() {
             launchSignUp();
         }
     }
-    else if (gameState === 2) {
-        inputLetters('b'); // Sign in menu
+    else if (gameState === 2 || gameState === 3) {
+        decryptState = inputLetters('b', decryptState); // Sign in menu
     }
     setBackgroundColor('b', '#f1f8d4ff');
     if (gameDebugMode) {
@@ -256,9 +257,9 @@ function buttonC() {
         bootScreenState = 0;
         launchDevice();
     }
-    else if (gameState === 2) {
+    else if (gameState === 2 || gameState === 3) {
         if (decryptState != 0) {
-            inputLetters('c');
+            decryptState = inputLetters('c', decryptState);
         }
         else {
             gameState--;
@@ -279,7 +280,7 @@ function buttonC() {
     }
 }
 ;
-// STATE 1
+// STATE 1 - Login 
 function launchSignIn() {
     resetScreenText(false);
     setText('ui_screen_text_l1', 'username');
@@ -293,19 +294,28 @@ function launchSignIn() {
 ;
 function launchSignUp() {
     resetScreenText(false);
-}
-;
-function inputLetters(buttonType) {
+    setText('ui_screen_text_l1', 'username');
+    setText('ui_screen_text_l2', 'a');
+    setText('ui_screen_text_l3', '');
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
+        uiScreenTextL2.style.fontSize = '5.5vh';
+    }
+}
+;
+// STATE 2 - User Login / 'Decrypt'
+function inputLetters(buttonType, inputState) {
+    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    var characterLimit = 3;
+    if (uiScreenTextL2) {
         if (buttonType === 'a') {
-            var newChar = uiScreenTextL2.innerText[decryptState];
+            var newChar = uiScreenTextL2.innerText[inputState];
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
             uiScreenTextL2.innerText += circularCharacter(newChar, 'forward');
         }
         else if (buttonType === 'b') {
-            if (decryptState < 4) {
-                decryptState++;
+            if (inputState < characterLimit) {
+                inputState++;
                 uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a';
             }
             else {
@@ -313,11 +323,12 @@ function inputLetters(buttonType) {
             }
         }
         else if (buttonType === 'c') {
-            decryptState--;
+            inputState--;
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
         }
         ;
     }
+    return inputState;
 }
 function circularCharacter(char, direction) {
     var validCharacters = __spreadArray([], Array(26), true).map(function (_, i) { return String.fromCharCode('a'.charCodeAt(0) + i); })
@@ -342,7 +353,7 @@ function circularCharacter(char, direction) {
     }
     return validCharacters[currentIndex];
 }
-// STATE 2
+// STATE 3 - User Sign Up / 'Decrypt'
 function decryptData() {
     console.log('decrypt');
     resetScreenText(false);
