@@ -8,16 +8,18 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 // Global variables
-var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up
+var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main, 5 - log out, 6 - store, 7 -quest, 8 - status
 var bootScreenState = 0;
 var loginScreenState = 1;
-var decryptState = 0;
-var usernameState = 0;
+var usernameLogingState = 0; // 0 - off
+var cryptonameLoginState = 0; // 0 - off
+var isUserLoggedIn = false;
 var gameDebugMode = true; // bool to determine if debug mode is on/off
 // Constants
 var SELECT_COLOUR = '#241f21ff';
 var INITIAL_COLOUR = '#f1f8d4ff';
 var DEFAULT_FONT_SIZE = "3.4vh";
+var LOGIN_CHARACTER_LIMIT = 3;
 // Initialization
 function onStart() {
     document.addEventListener('DOMContentLoaded', function () {
@@ -46,7 +48,7 @@ function updateDebugMessage(message) {
             debugElement.innerText = message;
     }
 }
-// Keyboard mapping 
+//  Keyboard Mapping 
 function mapKeyboardShortcuts() {
     window.addEventListener('keydown', function (event) {
         switch (event.key) {
@@ -151,7 +153,7 @@ function resetScreenText(setToBootScreen) {
     }
 }
 ;
-// State management
+// UI State Management
 function launchDevice() {
     switch (bootScreenState) {
         case 0:
@@ -211,14 +213,16 @@ function buttonA() {
         loginScreenSelector();
     }
     else if (gameState === 2 || gameState === 3) {
-        decryptState = inputLetters('a', decryptState);
+        if (!isUserLoggedIn) {
+            usernameLogingState = inputLetters('a', usernameLogingState);
+            //if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
+            //    checkUserLogin()
+            //}
+            //} else{
+            //    cryptonameLoginState = inputLetters('a',cryptonameLoginState) }
+        }
     }
     setBackgroundColor('a', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "select - ".concat(gameState.toString());
-    }
 }
 ;
 function buttonB() {
@@ -228,22 +232,25 @@ function buttonB() {
     else if (gameState === 1) {
         if (loginScreenState === 1) {
             gameState = 2;
-            launchSignIn();
+            enterUser(true);
         }
         else if (loginScreenState === 2) {
             gameState = 3;
-            launchSignUp();
+            enterUser(true);
         }
     }
     else if (gameState === 2 || gameState === 3) {
-        decryptState = inputLetters('b', decryptState); // Sign in menu
-    }
+        usernameLogingState = inputLetters('b', usernameLogingState); // Sign in menu
+        console.log(usernameLogingState);
+    } //else if (cryptonameLoginState === 0) {
+    //const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    //if (uiScreenTextL2){fetchUserByUsername(uiScreenTextL2.innerText)
+    //} else {
+    //cryptonameLoginState = inputLetters('b',cryptonameLoginState-1)
+    //cryptonameLoginState++;
+    //enterUser(false);}}
+    //}   
     setBackgroundColor('b', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "execute - ".concat(gameState.toString());
-    }
 }
 ;
 function buttonC() {
@@ -258,8 +265,8 @@ function buttonC() {
         launchDevice();
     }
     else if (gameState === 2 || gameState === 3) {
-        if (decryptState != 0) {
-            decryptState = inputLetters('c', decryptState);
+        if (usernameLogingState != 0) {
+            usernameLogingState = inputLetters('c', usernameLogingState);
         }
         else {
             gameState--;
@@ -273,28 +280,15 @@ function buttonC() {
         launchDevice();
     }
     setBackgroundColor('c', '#f1f8d4ff');
-    if (gameDebugMode) {
-        var debugElement = document.getElementById("debug");
-        if (debugElement)
-            debugElement.innerText = "cancel - ".concat(gameState.toString());
-    }
 }
 ;
 // STATE 1 - Login 
-function launchSignIn() {
+function enterUser(isUsername) {
     resetScreenText(false);
-    setText('ui_screen_text_l1', 'username');
-    setText('ui_screen_text_l2', 'a');
-    setText('ui_screen_text_l3', '');
-    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    if (uiScreenTextL2) {
-        uiScreenTextL2.style.fontSize = '5.5vh';
-    }
-}
-;
-function launchSignUp() {
-    resetScreenText(false);
-    setText('ui_screen_text_l1', 'username');
+    var formType = 'username';
+    if (!isUsername)
+        formType = 'cryptoname';
+    setText('ui_screen_text_l1', formType);
     setText('ui_screen_text_l2', 'a');
     setText('ui_screen_text_l3', '');
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
@@ -304,9 +298,15 @@ function launchSignUp() {
 }
 ;
 // STATE 2 - User Login / 'Decrypt'
+function checkUserLogin() {
+    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        fetchUserByUsername(uiScreenTextL2.innerText);
+    }
+    enterUser(false);
+}
 function inputLetters(buttonType, inputState) {
     var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    var characterLimit = 3;
     if (uiScreenTextL2) {
         if (buttonType === 'a') {
             var newChar = uiScreenTextL2.innerText[inputState];
@@ -314,12 +314,12 @@ function inputLetters(buttonType, inputState) {
             uiScreenTextL2.innerText += circularCharacter(newChar, 'forward');
         }
         else if (buttonType === 'b') {
-            if (inputState < characterLimit) {
+            if (inputState < LOGIN_CHARACTER_LIMIT) {
                 inputState++;
                 uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a';
             }
             else {
-                fetchUserByUsername(uiScreenTextL2.innerText);
+                return inputState; // break code
             }
         }
         else if (buttonType === 'c') {
@@ -353,7 +353,7 @@ function circularCharacter(char, direction) {
     }
     return validCharacters[currentIndex];
 }
-// STATE 3 - User Sign Up / 'Decrypt'
+// STATE 3 - User Sign Up 
 function decryptData() {
     console.log('decrypt');
     resetScreenText(false);
@@ -364,6 +364,12 @@ function generateNewEgg() {
     resetScreenText(false);
 }
 ;
+// STATE 4 - Main (Includes creature sub-states)
+var petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
+// STATE 5 - Log Out confirm
+// STATE 6 - Store
+// STATE 7 - Quest
+// STATE 7 - Status
 // REST API FUNCTIONS
 function fetchUsers() {
     fetch('/api/users')
@@ -380,6 +386,7 @@ function fetchUsers() {
 }
 ;
 function fetchUserByUsername(username) {
+    usernameLogingState--;
     fetch("/api/users/".concat(btoa(username)))
         .then(function (response) {
         if (!response.ok) {

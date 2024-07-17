@@ -1,9 +1,11 @@
 // Global variables
-let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up
+let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main, 5 - log out, 6 - store, 7 -quest, 8 - status
 let bootScreenState: number = 0;
 let loginScreenState: number = 1;
-let decryptState: number = 0;
-let usernameState: number = 0;
+
+let usernameLogingState: number = 0; // 0 - off
+let cryptonameLoginState: number = 0; // 0 - off
+let isUserLoggedIn: boolean = false
 
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
@@ -11,6 +13,7 @@ let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 const SELECT_COLOUR: string = '#241f21ff';
 const INITIAL_COLOUR: string = '#f1f8d4ff';
 const DEFAULT_FONT_SIZE = "3.4vh";
+const LOGIN_CHARACTER_LIMIT = 3;
 
 // Initialization
 function onStart(): void {
@@ -33,7 +36,7 @@ function setDebug(gameDebugMode: boolean): void {
     }
 };
 
-// Debugging utility
+    // Debugging utility
 function updateDebugMessage(message: string): void {
     if (gameDebugMode) {
         const debugElement = document.getElementById("debug");
@@ -41,7 +44,7 @@ function updateDebugMessage(message: string): void {
     }
 }
 
-// Keyboard mapping 
+    //  Keyboard Mapping 
 
 function mapKeyboardShortcuts(): void {
 
@@ -134,7 +137,7 @@ function resetScreenText(setToBootScreen: boolean): void {
     }
 };
 
-// State management
+// UI State Management
 
 function launchDevice(): void {
     switch (bootScreenState) {
@@ -195,15 +198,16 @@ function buttonA(): void {
     if (gameState === 1) {
         loginScreenSelector();
     } else if (gameState === 2 || gameState === 3){
-        decryptState = inputLetters('a',decryptState)
-    }
+        if (!isUserLoggedIn){
+            usernameLogingState = inputLetters('a',usernameLogingState)
+            //if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
+            //    checkUserLogin()
+            //}
+        //} else{
+        //    cryptonameLoginState = inputLetters('a',cryptonameLoginState) }
+    }}
 
     setBackgroundColor('a', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `select - ${gameState.toString()}`;
-    }
 };
 
 function buttonB(): void {
@@ -212,21 +216,23 @@ function buttonB(): void {
     } else if (gameState === 1) {
         if (loginScreenState === 1) {
             gameState = 2;
-            launchSignIn();
+            enterUser(true);
         } else if (loginScreenState === 2) {
             gameState = 3;
-            launchSignUp();
+            enterUser(true);
         }
     } else if (gameState === 2 || gameState === 3) {
-        decryptState = inputLetters('b',decryptState) // Sign in menu
-    }
-
+        usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
+        console.log(usernameLogingState)
+    } //else if (cryptonameLoginState === 0) {
+        //const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+        //if (uiScreenTextL2){fetchUserByUsername(uiScreenTextL2.innerText)
+    //} else {
+        //cryptonameLoginState = inputLetters('b',cryptonameLoginState-1)
+        //cryptonameLoginState++;
+        //enterUser(false);}}
+    //}   
     setBackgroundColor('b', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `execute - ${gameState.toString()}`;
-    }
 };
 
 function buttonC(): void {
@@ -239,8 +245,9 @@ function buttonC(): void {
         bootScreenState = 0;
         launchDevice();
     } else if (gameState === 2 || gameState === 3) {
-        if (decryptState != 0){
-            decryptState = inputLetters('c',decryptState)
+
+        if (usernameLogingState != 0){
+            usernameLogingState = inputLetters('c',usernameLogingState)
         } else {
             gameState --;
             bootScreenState = 4;
@@ -254,32 +261,16 @@ function buttonC(): void {
     }
 
     setBackgroundColor('c', '#f1f8d4ff');
-
-    if (gameDebugMode) {
-        const debugElement = document.getElementById("debug");
-        if (debugElement) debugElement.innerText = `cancel - ${gameState.toString()}`;
-    }
 };
 
 // STATE 1 - Login 
 
-function launchSignIn(): void {
+function enterUser(isUsername:boolean): void {
     resetScreenText(false);
 
-    setText('ui_screen_text_l1', 'username');
-    setText('ui_screen_text_l2', 'a');
-    setText('ui_screen_text_l3', '');
-
-    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    if (uiScreenTextL2){
-        uiScreenTextL2.style.fontSize = '5.5vh';
-    }
-};
-
-function launchSignUp(): void {
-    resetScreenText(false);
-
-    setText('ui_screen_text_l1', 'username');
+    let formType:string = 'username';
+    if (!isUsername) formType = 'cryptoname';
+    setText('ui_screen_text_l1', formType);
     setText('ui_screen_text_l2', 'a');
     setText('ui_screen_text_l3', '');
 
@@ -291,28 +282,32 @@ function launchSignUp(): void {
 
 // STATE 2 - User Login / 'Decrypt'
 
+function checkUserLogin():void{//Promise<void>{
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {fetchUserByUsername(uiScreenTextL2.innerText)}
+    enterUser(false)
+}
+
 function inputLetters(buttonType:string,inputState:number): number {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    const characterLimit = 3
-
     if (uiScreenTextL2) {
         if (buttonType === 'a'){
             let newChar = uiScreenTextL2.innerText[inputState];
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
             uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
         } else if (buttonType === 'b'){
-            if (inputState < characterLimit) {
+            if (inputState < LOGIN_CHARACTER_LIMIT) {
                 inputState ++;
-            uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
+                uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
             else {
-                fetchUserByUsername(uiScreenTextL2.innerText)
+                return inputState // break code
             }
         } else if (buttonType === 'c'){
             inputState --;
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
         };
     }
-    return inputState 
+    return inputState; 
 }
 
 function circularCharacter(char: string, direction: 'forward' | 'backward'): string {
@@ -343,7 +338,7 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
     return validCharacters[currentIndex];
 }
 
-// STATE 3 - User Sign Up / 'Decrypt'
+// STATE 3 - User Sign Up 
 
 function decryptData(): void {
     console.log('decrypt');
@@ -354,6 +349,19 @@ function generateNewEgg(): void {
     console.log('generate new egg');
     resetScreenText(false);
 };
+
+// STATE 4 - Main (Includes creature sub-states)
+let petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
+
+
+// STATE 5 - Log Out confirm
+
+// STATE 6 - Store
+
+// STATE 7 - Quest
+
+// STATE 7 - Status
+
 
 // REST API FUNCTIONS
 
@@ -372,11 +380,12 @@ function fetchUsers(): void {
 };
 
 function fetchUserByUsername(username: string): void {
-    fetch(`/api/users/${btoa(username)}`)
+    usernameLogingState --;
+     fetch(`/api/users/${btoa(username)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
-            }
+            } 
             return response.json();
         })
         .then(data => {
