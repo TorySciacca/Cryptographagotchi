@@ -6,6 +6,8 @@ let loginScreenState: number = 1;
 let usernameLogingState: number = 0; // 0 - off
 let cryptonameLoginState: number = 0; // 0 - off
 let isUserLoggedIn: boolean = false
+let username: string= ''
+let creatureName: string = ''
 
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
@@ -200,17 +202,16 @@ function buttonA(): void {
     } else if (gameState === 2 || gameState === 3){
         if (!isUserLoggedIn){
             usernameLogingState = inputLetters('a',usernameLogingState)
-            //if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
-            //    checkUserLogin()
-            //}
-        //} else{
-        //    cryptonameLoginState = inputLetters('a',cryptonameLoginState) }
-    }}
+        } else{
+            console.log(cryptonameLoginState)
+            cryptonameLoginState = inputLetters('a',cryptonameLoginState);
+         }
+    }
 
     setBackgroundColor('a', '#f1f8d4ff');
 };
 
-function buttonB(): void {
+async function buttonB(): Promise<void> {
     if (gameState === 0) {
         launchDevice();
     } else if (gameState === 1) {
@@ -222,16 +223,19 @@ function buttonB(): void {
             enterUser(true);
         }
     } else if (gameState === 2 || gameState === 3) {
-        usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
-        console.log(usernameLogingState)
-    } //else if (cryptonameLoginState === 0) {
-        //const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-        //if (uiScreenTextL2){fetchUserByUsername(uiScreenTextL2.innerText)
-    //} else {
-        //cryptonameLoginState = inputLetters('b',cryptonameLoginState-1)
-        //cryptonameLoginState++;
-        //enterUser(false);}}
-    //}   
+        if (!isUserLoggedIn){
+            usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
+            if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
+                if (await checkUserLogin()){}
+                else{usernameLogingState--;}}
+            }   
+        else {
+            cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
+            if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT){
+                cryptonameLoginState--;
+                console.log('crypto check')//checkUserLogin()}
+            }
+    } }
     setBackgroundColor('b', '#f1f8d4ff');
 };
 
@@ -245,13 +249,19 @@ function buttonC(): void {
         bootScreenState = 0;
         launchDevice();
     } else if (gameState === 2 || gameState === 3) {
-
-        if (usernameLogingState != 0){
-            usernameLogingState = inputLetters('c',usernameLogingState)
+        if (!isUserLoggedIn){
+            if (usernameLogingState != 0){
+                usernameLogingState = inputLetters('c',usernameLogingState)
+            } else {
+                gameState --;
+                bootScreenState = 4;
+                launchDevice();
+            }
         } else {
-            gameState --;
-            bootScreenState = 4;
-            launchDevice();
+            if (cryptonameLoginState != 0){
+                cryptonameLoginState = inputLetters('c',cryptonameLoginState)
+            } else {
+            }//gameState --; }
         }
 
     } else if(gameState === 3) {
@@ -282,17 +292,36 @@ function enterUser(isUsername:boolean): void {
 
 // STATE 2 - User Login / 'Decrypt'
 
-function checkUserLogin():void{//Promise<void>{
+async function checkUserLogin(): Promise<boolean>{
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    if (uiScreenTextL2) {fetchUserByUsername(uiScreenTextL2.innerText)}
-    enterUser(false)
+    if (uiScreenTextL2) {
+        if (await fetchUserByUsername(uiScreenTextL2.innerText)){
+            enterUser(false)
+            isUserLoggedIn = true
+            return true
+        } else{
+            return false
+        }
+    };
+    return false;
 }
+
+async function checkPetLogin(): Promise<void>{
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        if (await fetchUserByUsername(uiScreenTextL2.innerText)){
+            enterUser(false)
+            isUserLoggedIn = true
+        }};
+}
+
 
 function inputLetters(buttonType:string,inputState:number): number {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
         if (buttonType === 'a'){
             let newChar = uiScreenTextL2.innerText[inputState];
+            console.log('newChar',newChar)
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
             uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
         } else if (buttonType === 'b'){
@@ -300,6 +329,7 @@ function inputLetters(buttonType:string,inputState:number): number {
                 inputState ++;
                 uiScreenTextL2.innerText = uiScreenTextL2.innerText + 'a'}
             else {
+                inputState++;
                 return inputState // break code
             }
         } else if (buttonType === 'c'){
@@ -379,9 +409,8 @@ function fetchUsers(): void {
         .catch(error => console.error('Error fetching users:', error));
 };
 
-function fetchUserByUsername(username: string): void {
-    usernameLogingState --;
-     fetch(`/api/users/${btoa(username)}`)
+function fetchUserByUsername(username: string): Promise<boolean> {
+    return fetch(`/api/users/${btoa(username)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -390,9 +419,31 @@ function fetchUserByUsername(username: string): void {
         })
         .then(data => {
             console.log('User:', data);
+            return true;  // Return true indicating success
         })
-        .catch(error => console.error('Error fetching user:', error));
-};
+        .catch(error => {
+            console.error('Error fetching user:', error);
+            return false;  // Return false indicating failure
+        });
+}
+
+function fetchPetbyName(creatureName: string): Promise<boolean> {
+    return fetch(`/api/creatures/${btoa(creatureName)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            } 
+            return response.json();
+        })
+        .then(data => {
+            console.log('User:', data);
+            return true;  // Return true indicating success
+        })
+        .catch(error => {
+            console.error('Error fetching user:', error);
+            return false;  // Return false indicating failure
+        });
+}
 
 function createUser(username: string): void {
     fetch('/api/users', {
