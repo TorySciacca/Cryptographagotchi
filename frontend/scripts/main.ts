@@ -409,23 +409,62 @@ function fetchUsers(): void {
         .catch(error => console.error('Error fetching users:', error));
 };
 
-function fetchUserByUsername(username: string): Promise<boolean> {
-    return fetch(`/api/users/${btoa(username)}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            } 
-            return response.json();
-        })
-        .then(data => {
-            console.log('User:', data);
-            return true;  // Return true indicating success
-        })
-        .catch(error => {
-            console.error('Error fetching user:', error);
-            return false;  // Return false indicating failure
+// Define a function to toggle background color with flashing effect
+function flashBackgroundColor(element: HTMLElement, color: string, duration: number, flashes: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        let count = 0;
+        const interval = setInterval(() => {
+            if (count >= flashes * 2) {
+                clearInterval(interval);
+                resolve();
+            } else {
+                element.style.backgroundColor = (count % 2 === 0) ? color : '';
+                count++;
+            }
+        }, duration);
+    });
+}
+
+
+function fetchUserByUsername(username: string): Promise<boolean> {e
+    const antennaElement = document.querySelector('.antenna') as HTMLElement;
+
+    // Flash colors based on response status
+    const statusBasedColors: { [key: number]: string } = {
+        200: '#00FF00',  // Green for 2xx
+        400: '#FF0000'   // Red for 4xx (example, you can add more statuses as needed)
+    };
+
+    // Flash the background color three times over 300ms intervals based on response status
+    return flashBackgroundColor(antennaElement, '#241f21ff', 150, 3)
+        .then(() => {
+            // Perform the API call
+            return fetch(`/api/users/${btoa(username)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    // Determine the color based on response status
+                    const status = response.status;
+                    const color = statusBasedColors[status] || '#FFFFFF';  // Default to white if status not in map
+
+                    // Flash the determined color three times
+                    return flashBackgroundColor(antennaElement, color, 150, 3)
+                        .then(() => {
+                            return response.json();
+                        });
+                })
+                .then(data => {
+                    console.log('User:', data);
+                    return true;  // Return true indicating success
+                })
+                .catch(error => {
+                    console.error('Error fetching user:', error);
+                    return false;  // Return false indicating failure
+                });
         });
 }
+
 
 function fetchPetbyName(creatureName: string): Promise<boolean> {
     return fetch(`/api/creatures/${btoa(creatureName)}`)

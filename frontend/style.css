@@ -8,7 +8,7 @@ body{
     font-family: 'ocr',monospace; /* previous font: 'Trebuchet MS' */
     color: #241f21ff;
 }
-.backdrop,.screen,.button,.ui-text{
+.backdrop,.screen,.button,.ui-text,.antenna{
   position: absolute; 
   left: 0; 
   right: 0; 
@@ -33,6 +33,15 @@ body{
   border-radius: 10%;
   top: -3vh;
   outline: 1vh solid #241f21ff;
+}
+.antenna{
+  height: 2vh;
+  width: 3vh;
+  background-color: #241f21ff;
+  outline: 0.8vh solid #241f21ff;
+  top: -37vh;
+  left: 25vh;
+  border-radius: 3vh;
 }
 .button{
   height: 5vh;
