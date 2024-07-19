@@ -510,38 +510,42 @@ function flashBackgroundColor(element, color, duration, flashes) {
         }, duration);
     });
 }
+// Example usage within your fetch function
 function fetchUserByUsername(username) {
     // Select the antenna element based on your HTML structure
     var antennaElement = document.querySelector('.antenna');
     // Flash colors based on response status
     var statusBasedColors = {
         200: '#00FF00', // Green for 2xx
-        404: '#FF0000' // Red for 4xx (example, you can add more statuses as needed)
+        400: '#FF0000', // Red for 4xx (Client errors)
+        500: '#FF0000' // Red for 5xx (Server errors)
+        // Add more status codes as needed
     };
-    // Flash the background color three times over 300ms intervals based on response status
-    return flashBackgroundColor(antennaElement, '#241f21ff', 150, 3)
-        .then(function () {
-        // Perform the API call
-        return fetch("/api/users/".concat(btoa(username)))
-            .then(function (response) {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            // Determine the color based on response status
-            var status = response.status;
-            var color = statusBasedColors[status] || '#FFFFFF'; // Default to white if status not in map
-            // Flash the determined color three times
-            return flashBackgroundColor(antennaElement, color, 150, 3)
-                .then(function () {
-                return response.json();
-            });
-        })
-            .then(function (data) {
-            console.log('User:', data);
-            return true; // Return true indicating success
-        })
-            .catch(function (error) {
-            console.error('Error fetching user:', error);
+    // Perform the API call
+    return fetch("/api/users/".concat(btoa(username)))
+        .then(function (response) {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        // Determine the color based on response status
+        var status = response.status;
+        var color = statusBasedColors[status] || '#FFFFFF'; // Default to white if status not in map
+        // Flash the determined color three times
+        return flashBackgroundColor(antennaElement, color, 150, 3)
+            .then(function () {
+            return response.json();
+        });
+    })
+        .then(function (data) {
+        console.log('User:', data);
+        return true; // Return true indicating success
+    })
+        .catch(function (error) {
+        console.error('Error fetching user:', error);
+        // Flash red for error
+        var errorColor = statusBasedColors[400] || '#FF0000'; // Default to red if 400 not in map
+        return flashBackgroundColor(antennaElement, errorColor, 150, 3)
+            .then(function () {
             return false; // Return false indicating failure
         });
     });
