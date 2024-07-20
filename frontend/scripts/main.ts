@@ -469,7 +469,6 @@ function fetchUserByUsername(username: string): Promise<boolean> {
         });
 }
 
-
 function fetchPetbyName(creatureName: string): Promise<boolean> {
     return fetch(`/api/creatures/${btoa(creatureName)}`)
         .then(response => {
