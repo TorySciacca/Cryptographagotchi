@@ -410,7 +410,7 @@ function fetchUsers(): void {
 };
 
 // Define a function to toggle background color with flashing effect
-function flashBackgroundColor(element: HTMLElement, color: string, duration: number, flashes: number): Promise<void> {
+function flashBackgroundColor(element: any, color: string, duration: number, flashes: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let count = 0;
         const interval = setInterval(() => {
@@ -425,10 +425,10 @@ function flashBackgroundColor(element: HTMLElement, color: string, duration: num
     });
 }
 
-// Example usage within your fetch function
 function fetchUserByUsername(username: string): Promise<boolean> {
-    // Select the antenna element based on your HTML structure
-    const antennaElement = document.querySelector('.antenna') as HTMLElement;
+    // Select the antenna elements based on your HTML structure
+    const redAntennaElement = document.getElementById("red");
+    const greenAntennaElement = document.getElementById("green");
 
     // Flash colors based on response status
     const statusBasedColors: { [key: number]: string } = {
@@ -448,6 +448,9 @@ function fetchUserByUsername(username: string): Promise<boolean> {
             const status = response.status;
             const color = statusBasedColors[status] || '#FFFFFF';  // Default to white if status not in map
 
+            // Select the correct antenna element based on the color
+            const antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
+
             // Flash the determined color three times
             return flashBackgroundColor(antennaElement, color, 150, 3)
                 .then(() => {
@@ -462,6 +465,10 @@ function fetchUserByUsername(username: string): Promise<boolean> {
             console.error('Error fetching user:', error);
             // Flash red for error
             const errorColor = statusBasedColors[400] || '#FF0000';  // Default to red if 400 not in map
+
+            // Select the red antenna element for error
+            const antennaElement = redAntennaElement;
+
             return flashBackgroundColor(antennaElement, errorColor, 150, 3)
                 .then(() => {
                     return false;  // Return false indicating failure

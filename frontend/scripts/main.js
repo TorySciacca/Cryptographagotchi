@@ -510,10 +510,10 @@ function flashBackgroundColor(element, color, duration, flashes) {
         }, duration);
     });
 }
-// Example usage within your fetch function
 function fetchUserByUsername(username) {
-    // Select the antenna element based on your HTML structure
-    var antennaElement = document.querySelector('.antenna');
+    // Select the antenna elements based on your HTML structure
+    var redAntennaElement = document.getElementById("red");
+    var greenAntennaElement = document.getElementById("green");
     // Flash colors based on response status
     var statusBasedColors = {
         200: '#00FF00', // Green for 2xx
@@ -530,6 +530,8 @@ function fetchUserByUsername(username) {
         // Determine the color based on response status
         var status = response.status;
         var color = statusBasedColors[status] || '#FFFFFF'; // Default to white if status not in map
+        // Select the correct antenna element based on the color
+        var antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
         // Flash the determined color three times
         return flashBackgroundColor(antennaElement, color, 150, 3)
             .then(function () {
@@ -544,6 +546,8 @@ function fetchUserByUsername(username) {
         console.error('Error fetching user:', error);
         // Flash red for error
         var errorColor = statusBasedColors[400] || '#FF0000'; // Default to red if 400 not in map
+        // Select the red antenna element for error
+        var antennaElement = redAntennaElement;
         return flashBackgroundColor(antennaElement, errorColor, 150, 3)
             .then(function () {
             return false; // Return false indicating failure

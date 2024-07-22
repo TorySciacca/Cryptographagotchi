@@ -39,6 +39,7 @@ body{
   width: 4vh;
   background-color: #241f21ff;
   outline: 0.8vh solid #241f21ff;
+  outline-offset: -0.5vh;
   top: -37vh;
   left: 25vh;
   border-radius: 3vh;
