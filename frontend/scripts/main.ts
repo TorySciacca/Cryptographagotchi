@@ -233,8 +233,11 @@ async function buttonB(): Promise<void> {
             cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
             if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT){
                 if (await checkPetLogin()){
+                    gameState = 4;
                 }else{cryptonameLoginState--;}}
             }
+    } else if (gameState === 4){
+        console.log('the vegabus ')
     }
     setBackgroundColor('b', '#f1f8d4ff');
 };
@@ -312,7 +315,7 @@ async function checkPetLogin(): Promise<boolean>{
     if (uiScreenTextL2) {
         if (await fetchCreatureByName(uiScreenTextL2.innerText)){
             creatureName = uiScreenTextL2.innerText
-            enterUser(false)
+            resetScreenText(false)
             isUserLoggedIn = true
             return true
         } else {
@@ -469,27 +472,40 @@ function fetchUserByName(usernameInput: string): Promise<boolean> {
 function fetchCreatureByName(creatureNameInput: string): Promise<boolean> {
     return fetch(`/api/creatures/${btoa(creatureNameInput)}/${btoa(username)}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            } 
             displayAPIResponseToLED(response.status)
+            if (!response.ok) {
+                throw new Error(`Network response was not ok - Status: ${response.status}`);
+            } 
             return response.json();
         })
         .then(data => {
-            console.log('User:', data);
+            console.log('Creature:', data);
             return true;  // Return true indicating success
         })
         .catch(error => {
-            console.error('Error fetching user:', error);
+            console.error('Error fetching creature:', error);
             return false;  // Return false indicating failure
         });
 }
 
-function createUser(username: string): void {
+function createUser(usernameInput: string): void {
     fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: btoa(username) })
+        body: JSON.stringify({ name: btoa(usernameInput) })
+    })
+        .then(res => {
+            return res.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('ERROR', error));
+};
+
+function createCreature(creatureInput: string): void {
+    fetch('/api/creatures/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({name: btoa(creatureInput),owner: btoa(username)})
     })
         .then(res => {
             return res.json();

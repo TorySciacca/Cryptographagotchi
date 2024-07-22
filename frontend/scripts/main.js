@@ -270,7 +270,7 @@ function buttonB() {
                 case 0:
                     if (!(gameState === 0)) return [3 /*break*/, 1];
                     launchDevice();
-                    return [3 /*break*/, 7];
+                    return [3 /*break*/, 9];
                 case 1:
                     if (!(gameState === 1)) return [3 /*break*/, 2];
                     if (loginScreenState === 1) {
@@ -281,9 +281,9 @@ function buttonB() {
                         gameState = 3;
                         enterUser(true);
                     }
-                    return [3 /*break*/, 7];
+                    return [3 /*break*/, 9];
                 case 2:
-                    if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 7];
+                    if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 8];
                     if (!!isUserLoggedIn) return [3 /*break*/, 5];
                     usernameLogingState = inputLetters('b', usernameLogingState); // Sign in menu
                     if (!(usernameLogingState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
@@ -302,12 +302,19 @@ function buttonB() {
                     return [4 /*yield*/, checkPetLogin()];
                 case 6:
                     if (_a.sent()) {
+                        gameState = 4;
                     }
                     else {
                         cryptonameLoginState--;
                     }
                     _a.label = 7;
-                case 7:
+                case 7: return [3 /*break*/, 9];
+                case 8:
+                    if (gameState === 4) {
+                        console.log('the vegabus ');
+                    }
+                    _a.label = 9;
+                case 9:
                     setBackgroundColor('b', '#f1f8d4ff');
                     return [2 /*return*/];
             }
@@ -408,7 +415,7 @@ function checkPetLogin() {
                 case 1:
                     if (_a.sent()) {
                         creatureName = uiScreenTextL2.innerText;
-                        enterUser(false);
+                        resetScreenText(false);
                         isUserLoggedIn = true;
                         return [2 /*return*/, true];
                     }
@@ -565,26 +572,39 @@ function fetchUserByName(usernameInput) {
 function fetchCreatureByName(creatureNameInput) {
     return fetch("/api/creatures/".concat(btoa(creatureNameInput), "/").concat(btoa(username)))
         .then(function (response) {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
         displayAPIResponseToLED(response.status);
+        if (!response.ok) {
+            throw new Error("Network response was not ok - Status: ".concat(response.status));
+        }
         return response.json();
     })
         .then(function (data) {
-        console.log('User:', data);
+        console.log('Creature:', data);
         return true; // Return true indicating success
     })
         .catch(function (error) {
-        console.error('Error fetching user:', error);
+        console.error('Error fetching creature:', error);
         return false; // Return false indicating failure
     });
 }
-function createUser(username) {
+function createUser(usernameInput) {
     fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: btoa(username) })
+        body: JSON.stringify({ name: btoa(usernameInput) })
+    })
+        .then(function (res) {
+        return res.json();
+    })
+        .then(function (data) { return console.log(data); })
+        .catch(function (error) { return console.error('ERROR', error); });
+}
+;
+function createCreature(creatureInput) {
+    fetch('/api/creatures/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: btoa(creatureInput), owner: btoa(username) })
     })
         .then(function (res) {
         return res.json();

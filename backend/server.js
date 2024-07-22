@@ -47,9 +47,10 @@ app.get('/api/users/:name', (req, res) => {
 });
 
 // GET single creature by creaturename and username
-app.get('/api/users/:creature/:name', (req, res) => {
+app.get('/api/creatures/:creature/:name', (req, res) => {
     const creature = req.params.creature;
     const username = req.params.name;
+    
     db.get('SELECT * FROM creatures WHERE cryptoname = ? AND owner = ?', [creature, username], (err, row) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -77,6 +78,27 @@ app.post('/api/users', (req, res) => {
             return;
         }
         res.json({ name }); 
+    });
+});
+
+// POST a new creature
+app.post('/api/creatures', (req, res) => {
+    const { name, owner } = req.body;
+
+    // Validate input
+    if (!name || !owner) {
+        res.status(400).json({ message: 'Creature name and owner are required' });
+        return;
+    }
+
+    // Insert into database
+    db.run('INSERT INTO creatures (cryptoname, owner) VALUES (?, ?)', [name, owner], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        // Return success message or inserted data
+        res.json({ message: 'Creature added successfully', name, owner });
     });
 });
 
