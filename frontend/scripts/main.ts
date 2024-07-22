@@ -234,10 +234,11 @@ async function buttonB(): Promise<void> {
             if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT){
                 if (await checkPetLogin()){
                     gameState = 4;
+                    loadMain()
                 }else{cryptonameLoginState--;}}
             }
     } else if (gameState === 4){
-        console.log('the vegabus ')
+        
     }
     setBackgroundColor('b', '#f1f8d4ff');
 };
@@ -293,20 +294,32 @@ function enterUser(isUsername:boolean): void {
     }
 };
 
-// STATE 2 - User Login / 'Decrypt'
+// STATE 2 - User Login / 'Decrypt' / STATE 3 - User Sign Up 
 
-async function checkUserLogin(): Promise<boolean>{
+async function checkUserLogin(): Promise<boolean> {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+
     if (uiScreenTextL2) {
-        if (await fetchUserByName(uiScreenTextL2.innerText)){
-            username = uiScreenTextL2.innerText
-            enterUser(false)
-            isUserLoggedIn = true
-            return true
-        } else{
-            return false
+        const usernameEntered = uiScreenTextL2.innerText;
+
+        let loginSuccess = false;
+
+        if (gameState === 2) {
+            loginSuccess = await fetchUserByName(usernameEntered);
+        } else if (gameState === 3) {
+            loginSuccess = await createUser(usernameEntered);
         }
-    };
+
+        if (loginSuccess) {
+            username = usernameEntered;
+            enterUser(false);
+            isUserLoggedIn = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     return false;
 }
 
@@ -376,21 +389,10 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
     return validCharacters[currentIndex];
 }
 
-// STATE 3 - User Sign Up 
-
-function decryptData(): void {
-    console.log('decrypt');
-    resetScreenText(false);
-};
-
-function generateNewEgg(): void {
-    console.log('generate new egg');
-    resetScreenText(false);
-};
-
 // STATE 4 - Main (Includes creature sub-states)
 let petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
 
+function loadMain():void{}
 
 // STATE 5 - Log Out confirm
 
@@ -437,7 +439,6 @@ async function displayAPIResponseToLED(apiReponseStatus: number): Promise<void> 
     const greenAntennaElement = document.getElementById("green");
 
     // Flash colors based on response status
-    console.log(apiReponseStatus)
     const statusBasedColors: { [key: number]: string } = {
         200: '#00FF00',  // Green for 2xx
         404: '#FF0000',  // Red for 4xx (Client errors)
@@ -488,17 +489,19 @@ function fetchCreatureByName(creatureNameInput: string): Promise<boolean> {
         });
 }
 
-function createUser(usernameInput: string): void {
+async function createUser(usernameInput: string): Promise<boolean> {
     fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: btoa(usernameInput) })
     })
         .then(res => {
-            return res.json();
+            displayAPIResponseToLED(res.status)
+            return true;//res.json();
         })
         .then(data => console.log(data))
         .catch(error => console.error('ERROR', error));
+    return false
 };
 
 function createCreature(creatureInput: string): void {
@@ -513,3 +516,7 @@ function createCreature(creatureInput: string): void {
         .then(data => console.log(data))
         .catch(error => console.error('ERROR', error));
 };
+
+/*function updateCreature(updateParameters: string): void {
+    
+};*/

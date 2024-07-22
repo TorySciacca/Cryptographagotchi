@@ -303,6 +303,7 @@ function buttonB() {
                 case 6:
                     if (_a.sent()) {
                         gameState = 4;
+                        loadMain();
                     }
                     else {
                         cryptonameLoginState--;
@@ -311,7 +312,6 @@ function buttonB() {
                 case 7: return [3 /*break*/, 9];
                 case 8:
                     if (gameState === 4) {
-                        console.log('the vegabus ');
                     }
                     _a.label = 9;
                 case 9:
@@ -375,19 +375,31 @@ function enterUser(isUsername) {
     }
 }
 ;
-// STATE 2 - User Login / 'Decrypt'
+// STATE 2 - User Login / 'Decrypt' / STATE 3 - User Sign Up 
 function checkUserLogin() {
     return __awaiter(this, void 0, void 0, function () {
-        var uiScreenTextL2;
+        var uiScreenTextL2, usernameEntered, loginSuccess;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-                    if (!uiScreenTextL2) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fetchUserByName(uiScreenTextL2.innerText)];
+                    if (!uiScreenTextL2) return [3 /*break*/, 5];
+                    usernameEntered = uiScreenTextL2.innerText;
+                    loginSuccess = false;
+                    if (!(gameState === 2)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fetchUserByName(usernameEntered)];
                 case 1:
-                    if (_a.sent()) {
-                        username = uiScreenTextL2.innerText;
+                    loginSuccess = _a.sent();
+                    return [3 /*break*/, 4];
+                case 2:
+                    if (!(gameState === 3)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, createUser(usernameEntered)];
+                case 3:
+                    loginSuccess = _a.sent();
+                    _a.label = 4;
+                case 4:
+                    if (loginSuccess) {
+                        username = usernameEntered;
                         enterUser(false);
                         isUserLoggedIn = true;
                         return [2 /*return*/, true];
@@ -395,10 +407,8 @@ function checkUserLogin() {
                     else {
                         return [2 /*return*/, false];
                     }
-                    _a.label = 2;
-                case 2:
-                    ;
-                    return [2 /*return*/, false];
+                    _a.label = 5;
+                case 5: return [2 /*return*/, false];
             }
         });
     });
@@ -479,19 +489,9 @@ function circularCharacter(char, direction) {
     }
     return validCharacters[currentIndex];
 }
-// STATE 3 - User Sign Up 
-function decryptData() {
-    console.log('decrypt');
-    resetScreenText(false);
-}
-;
-function generateNewEgg() {
-    console.log('generate new egg');
-    resetScreenText(false);
-}
-;
 // STATE 4 - Main (Includes creature sub-states)
 var petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
+function loadMain() { }
 // STATE 5 - Log Out confirm
 // STATE 6 - Store
 // STATE 7 - Quest
@@ -534,8 +534,6 @@ function displayAPIResponseToLED(apiReponseStatus) {
                 case 0:
                     redAntennaElement = document.getElementById("red");
                     greenAntennaElement = document.getElementById("green");
-                    // Flash colors based on response status
-                    console.log(apiReponseStatus);
                     statusBasedColors = {
                         200: '#00FF00', // Green for 2xx
                         404: '#FF0000', // Red for 4xx (Client errors)
@@ -588,16 +586,22 @@ function fetchCreatureByName(creatureNameInput) {
     });
 }
 function createUser(usernameInput) {
-    fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: btoa(usernameInput) })
-    })
-        .then(function (res) {
-        return res.json();
-    })
-        .then(function (data) { return console.log(data); })
-        .catch(function (error) { return console.error('ERROR', error); });
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: btoa(usernameInput) })
+            })
+                .then(function (res) {
+                displayAPIResponseToLED(res.status);
+                return true; //res.json();
+            })
+                .then(function (data) { return console.log(data); })
+                .catch(function (error) { return console.error('ERROR', error); });
+            return [2 /*return*/, false];
+        });
+    });
 }
 ;
 function createCreature(creatureInput) {
@@ -613,3 +617,6 @@ function createCreature(creatureInput) {
         .catch(function (error) { return console.error('ERROR', error); });
 }
 ;
+/*function updateCreature(updateParameters: string): void {
+    
+};*/ 
