@@ -226,16 +226,16 @@ async function buttonB(): Promise<void> {
         if (!isUserLoggedIn){
             usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
             if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
-                if (await checkUserLogin()){}
-                else{usernameLogingState--;}}
+                if (await checkUserLogin()){
+                } else{usernameLogingState--;}}
             }   
         else {
             cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
             if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT){
-                cryptonameLoginState--;
-                console.log('crypto check')//checkUserLogin()}
+                if (await checkPetLogin()){
+                }else{cryptonameLoginState--;}}
             }
-    } }
+    }
     setBackgroundColor('b', '#f1f8d4ff');
 };
 
@@ -295,7 +295,8 @@ function enterUser(isUsername:boolean): void {
 async function checkUserLogin(): Promise<boolean>{
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
-        if (await fetchUserByUsername(uiScreenTextL2.innerText)){
+        if (await fetchUserByName(uiScreenTextL2.innerText)){
+            username = uiScreenTextL2.innerText
             enterUser(false)
             isUserLoggedIn = true
             return true
@@ -306,22 +307,26 @@ async function checkUserLogin(): Promise<boolean>{
     return false;
 }
 
-async function checkPetLogin(): Promise<void>{
+async function checkPetLogin(): Promise<boolean>{
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
-        if (await fetchUserByUsername(uiScreenTextL2.innerText)){
+        if (await fetchCreatureByName(uiScreenTextL2.innerText)){
+            creatureName = uiScreenTextL2.innerText
             enterUser(false)
             isUserLoggedIn = true
-        }};
+            return true
+        } else {
+            return false
+        }
+    };
+    return false;
 }
-
 
 function inputLetters(buttonType:string,inputState:number): number {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (uiScreenTextL2) {
         if (buttonType === 'a'){
             let newChar = uiScreenTextL2.innerText[inputState];
-            console.log('newChar',newChar)
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1)
             uiScreenTextL2.innerText += circularCharacter(newChar,'forward')
         } else if (buttonType === 'b'){
@@ -409,8 +414,7 @@ function fetchUsers(): void {
         .catch(error => console.error('Error fetching users:', error));
 };
 
-// Define a function to toggle background color with flashing effect
-function flashBackgroundColor(element: any, color: string, duration: number, flashes: number): Promise<void> {
+function flashLED(element: any, color: string, duration: number, flashes: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let count = 0;
         const interval = setInterval(() => {
@@ -425,63 +429,50 @@ function flashBackgroundColor(element: any, color: string, duration: number, fla
     });
 }
 
-function fetchUserByUsername(username: string): Promise<boolean> {
-    // Select the antenna elements based on your HTML structure
+async function displayAPIResponseToLED(apiReponseStatus: number): Promise<void> {
     const redAntennaElement = document.getElementById("red");
     const greenAntennaElement = document.getElementById("green");
 
     // Flash colors based on response status
+    console.log(apiReponseStatus)
     const statusBasedColors: { [key: number]: string } = {
         200: '#00FF00',  // Green for 2xx
-        400: '#FF0000',  // Red for 4xx (Client errors)
+        404: '#FF0000',  // Red for 4xx (Client errors)
         500: '#FF0000'   // Red for 5xx (Server errors)
         // Add more status codes as needed
     };
+    const color = statusBasedColors[apiReponseStatus] || '#FFFFFF'
+    const antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
 
-    // Perform the API call
-    return fetch(`/api/users/${btoa(username)}`)
+    await flashLED(antennaElement, color, 150, 3)
+
+    }
+
+function fetchUserByName(usernameInput: string): Promise<boolean> {
+    return fetch(`/api/users/${btoa(usernameInput)}`)
         .then(response => {
+            displayAPIResponseToLED(response.status)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
-            }
-            // Determine the color based on response status
-            const status = response.status;
-            const color = statusBasedColors[status] || '#FFFFFF';  // Default to white if status not in map
-
-            // Select the correct antenna element based on the color
-            const antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
-
-            // Flash the determined color three times
-            return flashBackgroundColor(antennaElement, color, 150, 3)
-                .then(() => {
-                    return response.json();
-                });
+            } 
+            return response.json();
         })
         .then(data => {
-            console.log('User:', data);
             return true;  // Return true indicating success
         })
         .catch(error => {
             console.error('Error fetching user:', error);
-            // Flash red for error
-            const errorColor = statusBasedColors[400] || '#FF0000';  // Default to red if 400 not in map
-
-            // Select the red antenna element for error
-            const antennaElement = redAntennaElement;
-
-            return flashBackgroundColor(antennaElement, errorColor, 150, 3)
-                .then(() => {
-                    return false;  // Return false indicating failure
-                });
+            return false;  // Return false indicating failure
         });
 }
 
-function fetchPetbyName(creatureName: string): Promise<boolean> {
-    return fetch(`/api/creatures/${btoa(creatureName)}`)
+function fetchCreatureByName(creatureNameInput: string): Promise<boolean> {
+    return fetch(`/api/creatures/${btoa(creatureNameInput)}/${btoa(username)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             } 
+            displayAPIResponseToLED(response.status)
             return response.json();
         })
         .then(data => {

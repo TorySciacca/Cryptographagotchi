@@ -46,6 +46,23 @@ app.get('/api/users/:name', (req, res) => {
     });
 });
 
+// GET single creature by creaturename and username
+app.get('/api/users/:creature/:name', (req, res) => {
+    const creature = req.params.creature;
+    const username = req.params.name;
+    db.get('SELECT * FROM creatures WHERE cryptoname = ? AND owner = ?', [creature, username], (err, row) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (!row) {
+            res.status(404).json({ message: 'Creature not found' });
+            return;
+        }
+        res.json(row);
+    });
+});
+
 // POST a new user
 app.post('/api/users', (req, res) => {
     

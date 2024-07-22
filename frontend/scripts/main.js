@@ -270,7 +270,7 @@ function buttonB() {
                 case 0:
                     if (!(gameState === 0)) return [3 /*break*/, 1];
                     launchDevice();
-                    return [3 /*break*/, 6];
+                    return [3 /*break*/, 7];
                 case 1:
                     if (!(gameState === 1)) return [3 /*break*/, 2];
                     if (loginScreenState === 1) {
@@ -281,28 +281,33 @@ function buttonB() {
                         gameState = 3;
                         enterUser(true);
                     }
-                    return [3 /*break*/, 6];
+                    return [3 /*break*/, 7];
                 case 2:
-                    if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 6];
+                    if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 7];
                     if (!!isUserLoggedIn) return [3 /*break*/, 5];
                     usernameLogingState = inputLetters('b', usernameLogingState); // Sign in menu
                     if (!(usernameLogingState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
                     return [4 /*yield*/, checkUserLogin()];
                 case 3:
-                    if (_a.sent()) { }
+                    if (_a.sent()) {
+                    }
                     else {
                         usernameLogingState--;
                     }
                     _a.label = 4;
-                case 4: return [3 /*break*/, 6];
+                case 4: return [3 /*break*/, 7];
                 case 5:
                     cryptonameLoginState = inputLetters('b', cryptonameLoginState); // Sign in menu
-                    if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT) {
-                        cryptonameLoginState--;
-                        console.log('crypto check'); //checkUserLogin()}
-                    }
-                    _a.label = 6;
+                    if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 7];
+                    return [4 /*yield*/, checkPetLogin()];
                 case 6:
+                    if (_a.sent()) {
+                    }
+                    else {
+                        cryptonameLoginState--;
+                    }
+                    _a.label = 7;
+                case 7:
                     setBackgroundColor('b', '#f1f8d4ff');
                     return [2 /*return*/];
             }
@@ -372,9 +377,10 @@ function checkUserLogin() {
                 case 0:
                     uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
                     if (!uiScreenTextL2) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fetchUserByUsername(uiScreenTextL2.innerText)];
+                    return [4 /*yield*/, fetchUserByName(uiScreenTextL2.innerText)];
                 case 1:
                     if (_a.sent()) {
+                        username = uiScreenTextL2.innerText;
                         enterUser(false);
                         isUserLoggedIn = true;
                         return [2 /*return*/, true];
@@ -398,16 +404,21 @@ function checkPetLogin() {
                 case 0:
                     uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
                     if (!uiScreenTextL2) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fetchUserByUsername(uiScreenTextL2.innerText)];
+                    return [4 /*yield*/, fetchCreatureByName(uiScreenTextL2.innerText)];
                 case 1:
                     if (_a.sent()) {
+                        creatureName = uiScreenTextL2.innerText;
                         enterUser(false);
                         isUserLoggedIn = true;
+                        return [2 /*return*/, true];
+                    }
+                    else {
+                        return [2 /*return*/, false];
                     }
                     _a.label = 2;
                 case 2:
                     ;
-                    return [2 /*return*/];
+                    return [2 /*return*/, false];
             }
         });
     });
@@ -417,7 +428,6 @@ function inputLetters(buttonType, inputState) {
     if (uiScreenTextL2) {
         if (buttonType === 'a') {
             var newChar = uiScreenTextL2.innerText[inputState];
-            console.log('newChar', newChar);
             uiScreenTextL2.innerText = uiScreenTextL2.innerText.substring(0, uiScreenTextL2.innerText.length - 1);
             uiScreenTextL2.innerText += circularCharacter(newChar, 'forward');
         }
@@ -494,8 +504,7 @@ function fetchUsers() {
         .catch(function (error) { return console.error('Error fetching users:', error); });
 }
 ;
-// Define a function to toggle background color with flashing effect
-function flashBackgroundColor(element, color, duration, flashes) {
+function flashLED(element, color, duration, flashes) {
     return new Promise(function (resolve, reject) {
         var count = 0;
         var interval = setInterval(function () {
@@ -510,56 +519,56 @@ function flashBackgroundColor(element, color, duration, flashes) {
         }, duration);
     });
 }
-function fetchUserByUsername(username) {
-    // Select the antenna elements based on your HTML structure
-    var redAntennaElement = document.getElementById("red");
-    var greenAntennaElement = document.getElementById("green");
-    // Flash colors based on response status
-    var statusBasedColors = {
-        200: '#00FF00', // Green for 2xx
-        400: '#FF0000', // Red for 4xx (Client errors)
-        500: '#FF0000' // Red for 5xx (Server errors)
-        // Add more status codes as needed
-    };
-    // Perform the API call
-    return fetch("/api/users/".concat(btoa(username)))
+function displayAPIResponseToLED(apiReponseStatus) {
+    return __awaiter(this, void 0, void 0, function () {
+        var redAntennaElement, greenAntennaElement, statusBasedColors, color, antennaElement;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    redAntennaElement = document.getElementById("red");
+                    greenAntennaElement = document.getElementById("green");
+                    // Flash colors based on response status
+                    console.log(apiReponseStatus);
+                    statusBasedColors = {
+                        200: '#00FF00', // Green for 2xx
+                        404: '#FF0000', // Red for 4xx (Client errors)
+                        500: '#FF0000' // Red for 5xx (Server errors)
+                        // Add more status codes as needed
+                    };
+                    color = statusBasedColors[apiReponseStatus] || '#FFFFFF';
+                    antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
+                    return [4 /*yield*/, flashLED(antennaElement, color, 150, 3)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function fetchUserByName(usernameInput) {
+    return fetch("/api/users/".concat(btoa(usernameInput)))
         .then(function (response) {
+        displayAPIResponseToLED(response.status);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        // Determine the color based on response status
-        var status = response.status;
-        var color = statusBasedColors[status] || '#FFFFFF'; // Default to white if status not in map
-        // Select the correct antenna element based on the color
-        var antennaElement = color === '#00FF00' ? greenAntennaElement : redAntennaElement;
-        // Flash the determined color three times
-        return flashBackgroundColor(antennaElement, color, 150, 3)
-            .then(function () {
-            return response.json();
-        });
+        return response.json();
     })
         .then(function (data) {
-        console.log('User:', data);
         return true; // Return true indicating success
     })
         .catch(function (error) {
         console.error('Error fetching user:', error);
-        // Flash red for error
-        var errorColor = statusBasedColors[400] || '#FF0000'; // Default to red if 400 not in map
-        // Select the red antenna element for error
-        var antennaElement = redAntennaElement;
-        return flashBackgroundColor(antennaElement, errorColor, 150, 3)
-            .then(function () {
-            return false; // Return false indicating failure
-        });
+        return false; // Return false indicating failure
     });
 }
-function fetchPetbyName(creatureName) {
-    return fetch("/api/creatures/".concat(btoa(creatureName)))
+function fetchCreatureByName(creatureNameInput) {
+    return fetch("/api/creatures/".concat(btoa(creatureNameInput), "/").concat(btoa(username)))
         .then(function (response) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+        displayAPIResponseToLED(response.status);
         return response.json();
     })
         .then(function (data) {
