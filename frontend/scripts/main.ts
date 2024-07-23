@@ -27,10 +27,6 @@ function onStart(): void {
 
 onStart();
 
-function initDebug(): void {
-    setDebug(window.location.href.indexOf("GitHub") !== -1);
-};
-
 function setDebug(gameDebugMode: boolean): void {
     const debugElement = document.getElementById("debug");
     if (debugElement) {
