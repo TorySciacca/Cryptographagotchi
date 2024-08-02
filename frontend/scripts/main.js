@@ -62,16 +62,11 @@ var LOGIN_CHARACTER_LIMIT = 3;
 // Initialization
 function onStart() {
     document.addEventListener('DOMContentLoaded', function () {
-        initDebug();
         mapKeyboardShortcuts();
     });
 }
 ;
 onStart();
-function initDebug() {
-    setDebug(window.location.href.indexOf("GitHub") !== -1);
-}
-;
 function setDebug(gameDebugMode) {
     var debugElement = document.getElementById("debug");
     if (debugElement) {

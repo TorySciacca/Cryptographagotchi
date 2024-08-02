@@ -20,7 +20,6 @@ const LOGIN_CHARACTER_LIMIT = 3;
 // Initialization
 function onStart(): void {
     document.addEventListener('DOMContentLoaded', () => {
-        initDebug();
         mapKeyboardShortcuts();
     });
 };
