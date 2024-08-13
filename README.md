@@ -1,8 +1,13 @@
 # Cryptographagotchi
 literally: coded egg watch
 
-A virtual pet inspired by Tamagotchi and the desire to teach children about abstract technological concepts in an interactive way. 
+A virtual pet inspired by Tamagotchi that aims to merges those UX ideas into a functional webapp. This enviroment is connected to a back-end database that aims to simulate a living ecology. 
 
-In todays day and age, it's a reality that many children will have greater access to a tech space that continues to advance. There are so many UX and technological concepts that we take for granted. As protecting our diogital data is becoming more and more important, it's important to help protect those who will try and acess the internet regardless.
+Users will be able to generate virtual pets that exist within the ecosystem.
 
-This web app is connected to a back-end database that aims to simulate a living ecology. 
+# Stack
+
+Frontend - Typescript 
+Backend - Node.js (Typescript)
+Database - SQLite
+Hosting - 
