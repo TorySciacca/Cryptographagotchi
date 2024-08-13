@@ -1,0 +1,19 @@
+# Use the official Node.js image.
+FROM node:18 AS build
+
+# Set the working directory.
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json.
+COPY frontend/package*.json ./
+
+# Install dependencies.
+RUN npm install
+
+# Copy the frontend code.
+COPY frontend/ .
+
+# Build the frontend application.
+RUN npm run build
+
+# The build output will be in the 'build' directory.
