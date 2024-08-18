@@ -140,7 +140,7 @@ app.delete('/api/users/:id', (req, res) => {
 });
 
 // Serve static files from 'frontend' directory
-app.use(express.static('../frontend'));
+app.use(express.static('backend/frontend'));
 
 // Start server
 app.listen(port, () => {
