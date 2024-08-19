@@ -123,6 +123,30 @@ app.put('/api/users/:id', (req, res) => {
     });
 });
 
+// PUT update creature data (done every tick)
+
+app.put('/api/creatures/:creatureName/:username', (req, res) => {
+    const creatureName = req.params.creatureName;
+    const username = req.params.username;
+    const creatureData = req.body;
+
+    // Update creature data in database
+
+    db.run('UPDATE creatures SET mass = ? WHERE cryptoname = ? AND owner = ?', [creatureData.mass, creatureName, username], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).json({ message: 'Creature not found' });
+            return;
+        }
+        // Return success message
+        ///res.json({ message: 'Creature updated successfully' });
+    });
+});
+
+
 // DELETE user by ID
 app.delete('/api/users/:id', (req, res) => {
     const userId = req.params.id;
@@ -139,8 +163,9 @@ app.delete('/api/users/:id', (req, res) => {
     });
 });
 
+
 // Serve static files from 'frontend' directory
-app.use(express.static('backend/frontend'));
+app.use(express.static('frontend'));
 
 // Start server
 app.listen(port, () => {
