@@ -1,5 +1,5 @@
 // Global variables
-let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main, 5 - log out, 6 - store, 7 -quest, 8 - status
+let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main
 let bootScreenState: number = 0;
 let loginScreenState: number = 1;
 
@@ -8,6 +8,7 @@ let cryptonameLoginState: number = 0; // 0 - off
 let isUserLoggedIn: boolean = false
 let username: string= ''
 let creatureName: string = ''
+let creatureData: any = null // the json data of the creature, assgined after login
 
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
@@ -386,31 +387,62 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 
 // STATE 4 - Main (Includes creature sub-states)
 
-//Pet Stats and Status
+//Pet Stats and Status, currently global but if code base is split up, this variable would not be exported.
 
-let petMass: number = 0;  
-let petHunger: number = 0; //caps at 100, represents %
-let petHealth: number = 0;  //caps at 100, represents %
-let petFatiuge: number = 0; //caps at 100, represents %
+// mass = creatureData.mass
+// health = creatureData.health
+// hunger = creatureData.hunger
+// fatigue = creatureData.fatigue
+// creatureHuntLength = creatureData.huntLength
 
-let petHuntLength: number = 0; 
-let petRestLength: number = 0;
+let creatureHuntLength: number = 0; 
+let creatureRestLength: number = 0;
 
-let petGrowthRate: number = 0;
-let petRiskFactor: number = 0;
+let creatureGrowthRate: number = 0;
+let creatureRiskFactor: number = 0;
 
-function loadMain():void{
+// Creature Loop
+setInterval(function(){ 
+    creatureGrowthRate = 1
+    if (gameState > 3) {
+        creatureData.mass += creatureGrowthRate;
+        const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
+        const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+        const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
+        if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
+            uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
+            uiScreenTextL2.innerText = String(creatureData.health) + '%';
+            uiScreenTextL3.innerText = String(creatureData.hunger) + '%';
+        
+            //save creature data
+            let creatureDataString = JSON.stringify(creatureData);
+            updateCreature(creatureDataString)
+        }
+    }
+}, 1000);
 
+function scaleToMetric(input: number): string {
+    let outputString = String(input).padStart(7, ' ') + 'g';
+
+    if (input > 1000) {
+        outputString = (input / 1000).toFixed(2).padStart(7, ' ') + 'kg';
+    } else if (input > 100000) {
+        outputString = (input / 100000).toFixed(2).padStart(7, ' ') + 'tg';
+    } else if (input > 1000000000) {
+        outputString = (input / 1000000000).toFixed(2).padStart(7, ' ') + 'bg';
+    }
+    return outputString;
 }
 
-// STATE 5 - Log Out confirm
-
-// STATE 6 - Store
-
-// STATE 7 - Quest
-
-// STATE 7 - Status
-
+function loadMain():void{
+    try {
+        if (creatureData === null) {
+            throw new Error('creatureData is null');
+        }
+    } catch (error) {
+        console.error('Error loading creature data:', error);
+    }
+}
 
 // REST API FUNCTIONS
 
@@ -490,6 +522,7 @@ function fetchCreatureByName(creatureNameInput: string): Promise<boolean> {
         })
         .then(data => {
             console.log('Creature:', data);
+            creatureData = data
             return true;  // Return true indicating success
         })
         .catch(error => {
@@ -526,6 +559,20 @@ function createCreature(creatureInput: string): void {
         .catch(error => console.error('ERROR', error));
 };
 
+function updateCreature(creatureData: string): void {
+    fetch('/api/creatures/' + btoa(creatureName) + '/' + btoa(username), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: creatureData
+    })
+        .then(res => {
+            //displayAPIResponseToLED(res.status)
+            return res.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('ERROR', error));
+
+}
 /*function updateCreature(updateParameters: string): void {
     
 };*/

@@ -45,7 +45,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 // Global variables
-var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main, 5 - log out, 6 - store, 7 -quest, 8 - status
+var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main
 var bootScreenState = 0;
 var loginScreenState = 1;
 var usernameLogingState = 0; // 0 - off
@@ -53,6 +53,7 @@ var cryptonameLoginState = 0; // 0 - off
 var isUserLoggedIn = false;
 var username = '';
 var creatureName = '';
+var creatureData = null; // the json data of the creature, assgined after login
 var gameDebugMode = true; // bool to determine if debug mode is on/off
 // Constants
 var SELECT_COLOUR = '#241f21ff';
@@ -485,12 +486,57 @@ function circularCharacter(char, direction) {
     return validCharacters[currentIndex];
 }
 // STATE 4 - Main (Includes creature sub-states)
-var petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
-function loadMain() { }
-// STATE 5 - Log Out confirm
-// STATE 6 - Store
-// STATE 7 - Quest
-// STATE 7 - Status
+//Pet Stats and Status, currently global but if code base is split up, this variable would not be exported.
+// mass = creatureData.mass
+// health = creatureData.health
+// hunger = creatureData.hunger
+// fatigue = creatureData.fatigue
+// creatureHuntLength = creatureData.huntLength
+var creatureHuntLength = 0;
+var creatureRestLength = 0;
+var creatureGrowthRate = 0;
+var creatureRiskFactor = 0;
+// Creature Loop
+setInterval(function () {
+    creatureGrowthRate = 1;
+    if (gameState > 3) {
+        creatureData.mass += creatureGrowthRate;
+        var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
+        var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+        var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
+        if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
+            uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
+            uiScreenTextL2.innerText = String(creatureData.health) + '%';
+            uiScreenTextL3.innerText = String(creatureData.hunger) + '%';
+            //save creature data
+            var creatureDataString = JSON.stringify(creatureData);
+            updateCreature(creatureDataString);
+        }
+    }
+}, 1000);
+function scaleToMetric(input) {
+    var outputString = String(input).padStart(7, ' ') + 'g';
+    if (input > 1000) {
+        outputString = (input / 1000).toFixed(2).padStart(7, ' ') + 'kg';
+    }
+    else if (input > 100000) {
+        outputString = (input / 100000).toFixed(2).padStart(7, ' ') + 'tg';
+    }
+    else if (input > 1000000000) {
+        outputString = (input / 1000000000).toFixed(2).padStart(7, ' ') + 'bg';
+    }
+    return outputString;
+}
+function loadMain() {
+    try {
+        if (creatureData === null) {
+            throw new Error('creatureData is null');
+        }
+    }
+    catch (error) {
+        console.error('Error loading creature data:', error);
+    }
+}
 // REST API FUNCTIONS
 function fetchUsers() {
     fetch('/api/users')
@@ -573,6 +619,7 @@ function fetchCreatureByName(creatureNameInput) {
     })
         .then(function (data) {
         console.log('Creature:', data);
+        creatureData = data;
         return true; // Return true indicating success
     })
         .catch(function (error) {
@@ -612,6 +659,19 @@ function createCreature(creatureInput) {
         .catch(function (error) { return console.error('ERROR', error); });
 }
 ;
+function updateCreature(creatureData) {
+    fetch('/api/creatures/' + btoa(creatureName) + '/' + btoa(username), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: creatureData
+    })
+        .then(function (res) {
+        //displayAPIResponseToLED(res.status)
+        return res.json();
+    })
+        .then(function (data) { return console.log(data); })
+        .catch(function (error) { return console.error('ERROR', error); });
+}
 /*function updateCreature(updateParameters: string): void {
     
 };*/ 
