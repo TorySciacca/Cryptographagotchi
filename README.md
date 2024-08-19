@@ -10,4 +10,4 @@ Users will be able to generate virtual pets that exist within the ecosystem.
 Frontend - Typescript 
 Backend - Node.js (Typescript)
 Database - SQLite
-Hosting - 
+Hosting - Heroku
