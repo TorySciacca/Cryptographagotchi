@@ -385,9 +385,23 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 }
 
 // STATE 4 - Main (Includes creature sub-states)
-let petMetamorphosisStage = 0; // currently global but if code base is split up, this variable would not be exported
 
-function loadMain():void{}
+//Pet Stats and Status
+
+let petMass: number = 0;  
+let petHunger: number = 0; //caps at 100, represents %
+let petHealth: number = 0;  //caps at 100, represents %
+let petFatiuge: number = 0; //caps at 100, represents %
+
+let petHuntLength: number = 0; 
+let petRestLength: number = 0;
+
+let petGrowthRate: number = 0;
+let petRiskFactor: number = 0;
+
+function loadMain():void{
+
+}
 
 // STATE 5 - Log Out confirm
 
