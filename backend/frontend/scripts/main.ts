@@ -223,7 +223,7 @@ async function buttonB(): Promise<void> {
             usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
             if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
                 if (await checkUserLogin()){
-                } else{usernameLogingState--;}}
+                } else {usernameLogingState--;}}
             }   
         else {
             cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
@@ -231,10 +231,10 @@ async function buttonB(): Promise<void> {
                 if (await checkPetLogin()){
                     gameState = 4;
                     loadMain()
-                }else{cryptonameLoginState--;}}
+                } else {cryptonameLoginState--;}}
             }
     } else if (gameState === 4){
-        
+        isHunting = !isHunting;
     }
     setBackgroundColor('b', '#f1f8d4ff');
 };
@@ -395,24 +395,50 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 // fatigue = creatureData.fatigue
 // creatureHuntLength = creatureData.huntLength
 
+let isHunting: boolean = false;
+
 let creatureHuntLength: number = 0; 
 let creatureRestLength: number = 0;
 
 let creatureGrowthRate: number = 0;
 let creatureRiskFactor: number = 0;
+let creatureHealRate: number = 0;
 
 // Creature Loop
-setInterval(function(){ 
+
+function setCreatureMode(isHunting:boolean) {
+    if (isHunting) {
+        isHunting = true
+    } else {
+        isHunting = false
+    }
+}
+
+setInterval(function(){ // EVERY TICK
     creatureGrowthRate = 1
+    creatureRiskFactor = 1
+    creatureHealRate = 1
+
     if (gameState > 3) {
         creatureData.mass += creatureGrowthRate;
+        if (isHunting) { 
+            //creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
+            //creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
+            //gain fatigue at growth rate
+        } else  { //is resting
+            creatureData.health = Math.min(100, creatureData.health + creatureHealRate / 2);
+            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate + creatureHealRate);
+            //lose fatigue at growth rate
+        }
+
         const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
         const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
+
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
-            uiScreenTextL2.innerText = String(creatureData.health) + '%';
-            uiScreenTextL3.innerText = String(creatureData.hunger) + '%';
+            uiScreenTextL2.innerText = String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
+            uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
         
             //save creature data
             let creatureDataString = JSON.stringify(creatureData);
@@ -420,6 +446,26 @@ setInterval(function(){
         }
     }
 }, 1000);
+
+setInterval(function(){ // EVERY 10 TICKS
+    if (gameState > 3 && isHunting) {
+        const generateFight = () => {
+            // randomly select either a or b
+            const select = Math.random() >= 0.5 ? 'win' : 'loss';
+            switch (select) {
+                case 'win':
+                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 20);
+                    console.log('win');
+                    break;
+                case 'loss':
+                    creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 20);
+                    console.log('loss');
+                    break;
+            }
+        };
+        generateFight();
+    }
+},10000);
 
 function scaleToMetric(input: number): string {
     let outputString = String(input).padStart(7, ' ') + 'g';

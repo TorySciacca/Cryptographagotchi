@@ -308,6 +308,7 @@ function buttonB() {
                 case 7: return [3 /*break*/, 9];
                 case 8:
                     if (gameState === 4) {
+                        isHunting = !isHunting;
                     }
                     _a.label = 9;
                 case 9:
@@ -492,22 +493,40 @@ function circularCharacter(char, direction) {
 // hunger = creatureData.hunger
 // fatigue = creatureData.fatigue
 // creatureHuntLength = creatureData.huntLength
+var isHunting = false;
 var creatureHuntLength = 0;
 var creatureRestLength = 0;
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
 // Creature Loop
+function setCreatureMode(isHunting) {
+    if (isHunting) {
+        isHunting = true;
+    }
+    else {
+        isHunting = false;
+    }
+}
 setInterval(function () {
     creatureGrowthRate = 1;
+    creatureRiskFactor = 1;
     if (gameState > 3) {
         creatureData.mass += creatureGrowthRate;
+        if (isHunting) {
+            creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
+            creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
+        }
+        else { //is resting
+            creatureData.health = Math.min(100, creatureData.health + creatureGrowthRate / 2);
+            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate / 2);
+        }
         var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
         var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
-            uiScreenTextL2.innerText = String(creatureData.health) + '%';
-            uiScreenTextL3.innerText = String(creatureData.hunger) + '%';
+            uiScreenTextL2.innerText = String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
+            uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
             //save creature data
             var creatureDataString = JSON.stringify(creatureData);
             updateCreature(creatureDataString);
