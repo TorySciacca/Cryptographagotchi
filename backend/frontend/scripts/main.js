@@ -492,10 +492,8 @@ function circularCharacter(char, direction) {
 // health = creatureData.health
 // hunger = creatureData.hunger
 // fatigue = creatureData.fatigue
-// creatureHuntLength = creatureData.huntLength
+// isHunting = creatureData.isHunting
 var isHunting = false;
-var creatureHuntLength = 0;
-var creatureRestLength = 0;
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
 var creatureHealRate = 0;
