@@ -498,6 +498,7 @@ var creatureHuntLength = 0;
 var creatureRestLength = 0;
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
+var creatureHealRate = 0;
 // Creature Loop
 function setCreatureMode(isHunting) {
     if (isHunting) {
@@ -510,15 +511,18 @@ function setCreatureMode(isHunting) {
 setInterval(function () {
     creatureGrowthRate = 1;
     creatureRiskFactor = 1;
+    creatureHealRate = 1;
     if (gameState > 3) {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) {
-            creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
-            creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
+            //creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
+            //creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
+            //gain fatigue at growth rate
         }
         else { //is resting
-            creatureData.health = Math.min(100, creatureData.health + creatureGrowthRate / 2);
-            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate / 2);
+            creatureData.health = Math.min(100, creatureData.health + creatureHealRate / 2);
+            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate + creatureHealRate);
+            //lose fatigue at growth rate
         }
         var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
         var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
@@ -533,6 +537,25 @@ setInterval(function () {
         }
     }
 }, 1000);
+setInterval(function () {
+    if (gameState > 3 && isHunting) {
+        var generateFight = function () {
+            // randomly select either a or b
+            var select = Math.random() >= 0.5 ? 'win' : 'loss';
+            switch (select) {
+                case 'win':
+                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 20);
+                    console.log('win');
+                    break;
+                case 'loss':
+                    creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 20);
+                    console.log('loss');
+                    break;
+            }
+        };
+        generateFight();
+    }
+}, 10000);
 function scaleToMetric(input) {
     var outputString = String(input).padStart(7, ' ') + 'g';
     if (input > 1000) {
