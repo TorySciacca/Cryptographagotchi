@@ -393,12 +393,9 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 // health = creatureData.health
 // hunger = creatureData.hunger
 // fatigue = creatureData.fatigue
-// creatureHuntLength = creatureData.huntLength
+// isHunting = creatureData.isHunting
 
 let isHunting: boolean = false;
-
-let creatureHuntLength: number = 0; 
-let creatureRestLength: number = 0;
 
 let creatureGrowthRate: number = 0;
 let creatureRiskFactor: number = 0;
