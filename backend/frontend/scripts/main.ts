@@ -202,6 +202,8 @@ function buttonA(): void {
             console.log(cryptonameLoginState)
             cryptonameLoginState = inputLetters('a',cryptonameLoginState);
          }
+    } else if (gameState === 4) {
+        updateDisplayedCreatureStat(true);
     }
 
     setBackgroundColor('a', '#f1f8d4ff');
@@ -401,6 +403,8 @@ let creatureGrowthRate: number = 0;
 let creatureRiskFactor: number = 0;
 let creatureHealRate: number = 0;
 
+let displayedCreatureStat: number = 0;
+
 // Creature Loop
 
 function setCreatureMode(isHunting:boolean) {
@@ -429,12 +433,12 @@ setInterval(function(){ // EVERY TICK
         }
 
         const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
-        const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+       const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
-            uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
-            uiScreenTextL2.innerText = String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
+            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+            //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
             uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
         
             //save creature data
@@ -464,6 +468,22 @@ setInterval(function(){ // EVERY 10 TICKS
     }
 },10000);
 
+function updateDisplayedCreatureStat(swap:boolean): string {
+    // 0 = mass, 1 = health, 2 = hunger
+    
+    if (swap) {
+        displayedCreatureStat = displayedCreatureStat === 2 ? 0 : displayedCreatureStat + 1;
+    }
+
+    if (displayedCreatureStat === 1) {
+        return 'hp: ' + String(creatureData.health) + '%';
+    } else if (displayedCreatureStat === 2) {
+        return 'hgr: ' + String(creatureData.hunger) + '%';
+    } else {
+        return 'mass: ' + scaleToMetric(creatureData.mass);
+    }
+}
+
 function scaleToMetric(input: number): string {
     let outputString = String(input).padStart(7, ' ') + 'g';
 
@@ -481,6 +501,11 @@ function loadMain():void{
     try {
         if (creatureData === null) {
             throw new Error('creatureData is null');
+        } else {
+            const creatureDataText = document.getElementById("ui_screen_text_l2");
+            if (creatureDataText != null) {
+                creatureDataText.innerText === String(creatureData.mass)
+            }
         }
     } catch (error) {
         console.error('Error loading creature data:', error);

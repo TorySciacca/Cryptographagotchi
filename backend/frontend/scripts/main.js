@@ -256,6 +256,9 @@ function buttonA() {
             cryptonameLoginState = inputLetters('a', cryptonameLoginState);
         }
     }
+    else if (gameState === 4) {
+        updateDisplayedCreatureStat(true);
+    }
     setBackgroundColor('a', '#f1f8d4ff');
 }
 ;
@@ -497,6 +500,7 @@ var isHunting = false;
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
 var creatureHealRate = 0;
+var displayedCreatureStat = 0;
 // Creature Loop
 function setCreatureMode(isHunting) {
     if (isHunting) {
@@ -526,8 +530,8 @@ setInterval(function () {
         var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
-            uiScreenTextL1.innerText = scaleToMetric(creatureData.mass);
-            uiScreenTextL2.innerText = String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
+            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
+            //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
             uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
             //save creature data
             var creatureDataString = JSON.stringify(creatureData);
@@ -554,6 +558,21 @@ setInterval(function () {
         generateFight();
     }
 }, 10000);
+function updateDisplayedCreatureStat(swap) {
+    // 0 = mass, 1 = health, 2 = hunger
+    if (swap) {
+        displayedCreatureStat = displayedCreatureStat === 2 ? 0 : displayedCreatureStat + 1;
+    }
+    if (displayedCreatureStat === 1) {
+        return 'hp: ' + String(creatureData.health) + '%';
+    }
+    else if (displayedCreatureStat === 2) {
+        return 'hgr: ' + String(creatureData.hunger) + '%';
+    }
+    else {
+        return 'mass: ' + scaleToMetric(creatureData.mass);
+    }
+}
 function scaleToMetric(input) {
     var outputString = String(input).padStart(7, ' ') + 'g';
     if (input > 1000) {
@@ -571,6 +590,12 @@ function loadMain() {
     try {
         if (creatureData === null) {
             throw new Error('creatureData is null');
+        }
+        else {
+            var creatureDataText = document.getElementById("ui_screen_text_l2");
+            if (creatureDataText != null) {
+                creatureDataText.innerText === String(creatureData.mass);
+            }
         }
     }
     catch (error) {
