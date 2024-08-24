@@ -480,7 +480,7 @@ function updateDisplayedCreatureStat(swap:boolean): string {
     } else if (displayedCreatureStat === 2) {
         return 'hgr: ' + String(creatureData.hunger) + '%';
     } else {
-        return 'mass: ' + scaleToMetric(creatureData.mass);
+        return scaleToMetric(creatureData.mass);
     }
 }
 
