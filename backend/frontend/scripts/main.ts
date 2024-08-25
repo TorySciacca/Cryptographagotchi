@@ -438,6 +438,8 @@ setInterval(function(){ // EVERY TICK
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+            updateCreatureImage()
+            uiScreenTextL2.innerText = ' . '
             //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
             uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
         
@@ -497,12 +499,20 @@ function scaleToMetric(input: number): string {
     return outputString;
 }
 
+function updateCreatureImage() {
+    const creatureImage = document.getElementById("creature") as HTMLImageElement | null;
+    if (creatureImage) {
+        creatureImage.style.visibility = 'visible';
+    }
+}
+
 function loadMain():void{
     try {
         if (creatureData === null) {
             throw new Error('creatureData is null');
         } else {
             const creatureDataText = document.getElementById("ui_screen_text_l2");
+
             if (creatureDataText != null) {
                 creatureDataText.innerText === String(creatureData.mass)
             }

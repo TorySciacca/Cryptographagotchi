@@ -8,7 +8,7 @@ body{
     font-family: 'ocr',monospace; /* previous font: 'Trebuchet MS' */
     color: #241f21ff;
 }
-.backdrop,.screen,.button,.ui-text,.antenna,.antenna-led{
+.backdrop,.screen,.button,.ui-text,.antenna,.antenna-led,.creature {
   position: absolute; 
   left: 0; 
   right: 0; 
@@ -33,6 +33,7 @@ body{
   border-radius: 10%;
   top: -3vh;
   outline: 1vh solid #241f21ff;
+  user-select: none;
 }
 .antenna{
   height: 2vh;
@@ -74,4 +75,11 @@ h1{
   padding: 0.5vh;
   border-radius: 5vh;
   background-color: #f1f8d4ff;
+}
+
+.creature{
+  display: block;
+  width: 7vh;
+  height: 7vh;
+  visibility: hidden;
 }

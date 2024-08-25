@@ -531,6 +531,8 @@ setInterval(function () {
         var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
+            updateCreatureImage();
+            uiScreenTextL2.innerText = ' . ';
             //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
             uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
             //save creature data
@@ -570,7 +572,7 @@ function updateDisplayedCreatureStat(swap) {
         return 'hgr: ' + String(creatureData.hunger) + '%';
     }
     else {
-        return 'mass: ' + scaleToMetric(creatureData.mass);
+        return scaleToMetric(creatureData.mass);
     }
 }
 function scaleToMetric(input) {
@@ -585,6 +587,12 @@ function scaleToMetric(input) {
         outputString = (input / 1000000000).toFixed(2).padStart(7, ' ') + 'bg';
     }
     return outputString;
+}
+function updateCreatureImage() {
+    var creatureImage = document.getElementById("creature");
+    if (creatureImage) {
+        creatureImage.style.visibility = 'visible';
+    }
 }
 function loadMain() {
     try {
