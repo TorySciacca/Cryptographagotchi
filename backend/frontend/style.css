@@ -79,7 +79,7 @@ h1{
 
 .creature{
   display: block;
-  width: 7vh;
-  height: 7vh;
+  width: 20vh;
+  height: 20vh;
   visibility: hidden;
 }

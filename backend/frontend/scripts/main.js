@@ -591,8 +591,12 @@ function scaleToMetric(input) {
 function updateCreatureImage() {
     var creatureImage = document.getElementById("creature");
     if (creatureImage) {
-        creatureImage.style.visibility = 'visible';
+        creatureImage.src = "images/creature-" + getImageScale(creatureData.mass) + ".svg";
+        creatureImage.style.visibility = "visible";
     }
+}
+function getImageScale(mass) {
+    return Math.min(6, Math.floor(Math.log10(mass))) + '';
 }
 function loadMain() {
     try {

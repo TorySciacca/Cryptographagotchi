@@ -423,34 +423,35 @@ setInterval(function(){ // EVERY TICK
     if (gameState > 3) {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) { 
-            //creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
-            //creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
             //gain fatigue at growth rate
+            creatureData.fatigue = Math.max(0, creatureData.fatigue + creatureGrowthRate);
         } else  { //is resting
+            //gain health at half growth rate
             creatureData.health = Math.min(100, creatureData.health + creatureHealRate / 2);
+            //gain hunger at growth rate + heal rate
             creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate + creatureHealRate);
             //lose fatigue at growth rate
+            creatureData.fatigue = Math.max(0, creatureData.fatigue - creatureGrowthRate);
         }
 
         const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
-       const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+        const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
             updateCreatureImage()
-            uiScreenTextL2.innerText = ' . '
-            //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
+            uiScreenTextL2.innerText = ' . ' // leaves space for image
             uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
         
-            //save creature data
+            //save creature data to database
             let creatureDataString = JSON.stringify(creatureData);
             updateCreature(creatureDataString)
         }
     }
 }, 1000);
 
-setInterval(function(){ // EVERY 10 TICKS
+setInterval(function(){ // EVERY 10 TICKS, FIGHT
     if (gameState > 3 && isHunting) {
         const generateFight = () => {
             // randomly select either a or b
@@ -471,16 +472,18 @@ setInterval(function(){ // EVERY 10 TICKS
 },10000);
 
 function updateDisplayedCreatureStat(swap:boolean): string {
-    // 0 = mass, 1 = health, 2 = hunger
+    // 0 = mass, 1 = health, 2 = hunger, 3 = fatigue
     
     if (swap) {
-        displayedCreatureStat = displayedCreatureStat === 2 ? 0 : displayedCreatureStat + 1;
+        displayedCreatureStat = (displayedCreatureStat + 1) % 3;
     }
 
     if (displayedCreatureStat === 1) {
-        return 'hp: ' + String(creatureData.health) + '%';
+        return 'hlth: ' + String(creatureData.health) + '%';
     } else if (displayedCreatureStat === 2) {
-        return 'hgr: ' + String(creatureData.hunger) + '%';
+        return 'hngr: ' + String(creatureData.hunger) + '%';
+    } else if (displayedCreatureStat === 3) {
+        return 'ftge: ' + String(creatureData.fatigue) + '%';
     } else {
         return scaleToMetric(creatureData.mass);
     }
@@ -502,8 +505,13 @@ function scaleToMetric(input: number): string {
 function updateCreatureImage() {
     const creatureImage = document.getElementById("creature") as HTMLImageElement | null;
     if (creatureImage) {
-        creatureImage.style.visibility = 'visible';
+        creatureImage.src = "images/creature-" + getImageScale(creatureData.mass) + ".svg";
+        creatureImage.style.visibility = "visible";
     }
+}
+
+function getImageScale(mass: number): string {
+    return Math.min(6, Math.floor(Math.log10(mass))) + '';
 }
 
 function loadMain():void{
