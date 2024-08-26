@@ -212,8 +212,9 @@ function launchDevice() {
         case 4:
             bootScreenState++;
             resetScreenText(false);
-            setText('ui_screen_text_l1', 'decrypt');
-            setText('ui_screen_text_l2', 'new egg');
+            setText('ui_screen_text_l1', 'log in');
+            setText('ui_screen_text_l2', 'new user');
+            setText('ui_screen_text_l3', ' ');
             loginScreenState = 2;
             loginScreenSelector();
             gameState = 1;
@@ -259,7 +260,7 @@ function buttonA() {
     else if (gameState === 4) {
         updateDisplayedCreatureStat(true);
     }
-    setBackgroundColor('a', '#f1f8d4ff');
+    setBackgroundColor('a', INITIAL_COLOUR);
 }
 ;
 function buttonB() {
@@ -284,7 +285,7 @@ function buttonB() {
                 case 2:
                     if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 8];
                     if (!!isUserLoggedIn) return [3 /*break*/, 5];
-                    usernameLoginState = inputLetters('b', usernameLoginState); // Sign in menu
+                    usernameLoginState = inputLetters('b', usernameLoginState); // Sign in menu - username
                     if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
                     return [4 /*yield*/, checkUserLogin()];
                 case 3:
@@ -296,9 +297,9 @@ function buttonB() {
                     _a.label = 4;
                 case 4: return [3 /*break*/, 7];
                 case 5:
-                    cryptonameLoginState = inputLetters('b', cryptonameLoginState); // Sign in menu
+                    cryptonameLoginState = inputLetters('b', cryptonameLoginState); // Sign in menu - creature
                     if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 7];
-                    return [4 /*yield*/, checkPetLogin()];
+                    return [4 /*yield*/, checkCreatureLogin()];
                 case 6:
                     if (_a.sent()) {
                         gameState = 4;
@@ -318,7 +319,7 @@ function buttonB() {
                     }
                     _a.label = 9;
                 case 9:
-                    setBackgroundColor('b', '#f1f8d4ff');
+                    setBackgroundColor('b', INITIAL_COLOUR);
                     return [2 /*return*/];
             }
         });
@@ -342,9 +343,7 @@ function buttonC() {
                 usernameLoginState = inputLetters('c', usernameLoginState);
             }
             else {
-                gameState--;
-                bootScreenState = 4;
-                launchDevice();
+                logOut();
             }
         }
         else {
@@ -352,6 +351,7 @@ function buttonC() {
                 cryptonameLoginState = inputLetters('c', cryptonameLoginState);
             }
             else {
+                logOut();
             } //gameState --; }
         }
     }
@@ -368,7 +368,7 @@ function buttonC() {
         gameState--;
         loadMain();
     }
-    setBackgroundColor('c', '#f1f8d4ff');
+    setBackgroundColor('c', INITIAL_COLOUR);
 }
 ;
 // STATE 1 - Login 
@@ -394,21 +394,17 @@ function checkUserLogin() {
             switch (_a.label) {
                 case 0:
                     uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-                    if (!uiScreenTextL2) return [3 /*break*/, 5];
+                    if (!uiScreenTextL2) return [3 /*break*/, 4];
                     usernameEntered = uiScreenTextL2.innerText;
-                    loginSuccess = false;
-                    if (!(gameState === 2)) return [3 /*break*/, 2];
                     return [4 /*yield*/, fetchUserByName(usernameEntered)];
                 case 1:
                     loginSuccess = _a.sent();
-                    return [3 /*break*/, 4];
-                case 2:
-                    if (!(gameState === 3)) return [3 /*break*/, 4];
+                    if (!(!loginSuccess && gameState === 3)) return [3 /*break*/, 3];
                     return [4 /*yield*/, createUser(usernameEntered)];
-                case 3:
+                case 2:
                     loginSuccess = _a.sent();
-                    _a.label = 4;
-                case 4:
+                    _a.label = 3;
+                case 3:
                     if (loginSuccess) {
                         username = usernameEntered;
                         enterUser(false);
@@ -418,24 +414,35 @@ function checkUserLogin() {
                     else {
                         return [2 /*return*/, false];
                     }
-                    _a.label = 5;
-                case 5: return [2 /*return*/, false];
+                    _a.label = 4;
+                case 4: return [2 /*return*/, false];
             }
         });
     });
 }
-function checkPetLogin() {
+function checkCreatureLogin() {
     return __awaiter(this, void 0, void 0, function () {
-        var uiScreenTextL2;
+        var uiScreenTextL2, creatureName, loginSuccess, valueInput;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-                    if (!uiScreenTextL2) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fetchCreatureByName(uiScreenTextL2.innerText)];
+                    if (!uiScreenTextL2)
+                        return [2 /*return*/, false];
+                    creatureName = uiScreenTextL2.innerText;
+                    loginSuccess = false;
+                    if (!(gameState === 3)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, createCreature(creatureName)];
                 case 1:
-                    if (_a.sent()) {
-                        creatureName = uiScreenTextL2.innerText;
+                    valueInput = _a.sent();
+                    if (!valueInput) {
+                        return [2 /*return*/, false];
+                    }
+                    _a.label = 2;
+                case 2: return [4 /*yield*/, fetchCreatureByName(creatureName)];
+                case 3:
+                    loginSuccess = _a.sent();
+                    if (loginSuccess) {
                         resetScreenText(false);
                         isUserLoggedIn = true;
                         return [2 /*return*/, true];
@@ -443,10 +450,7 @@ function checkPetLogin() {
                     else {
                         return [2 /*return*/, false];
                     }
-                    _a.label = 2;
-                case 2:
-                    ;
-                    return [2 /*return*/, false];
+                    return [2 /*return*/];
             }
         });
     });
@@ -774,18 +778,25 @@ function createUser(usernameInput) {
 }
 ;
 function createCreature(creatureInput) {
-    fetch('/api/creatures/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: btoa(creatureInput), owner: btoa(username) })
-    })
-        .then(function (res) {
-        return res.json();
-    })
-        .then(function (data) { return console.log(data); })
-        .catch(function (error) { return console.error('ERROR', error); });
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, fetch('/api/creatures/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: btoa(creatureInput), owner: btoa(username) })
+                })
+                    .then(function (res) {
+                    //console.log('Response received:', res);
+                    displayAPIResponseToLED(res.status);
+                    return res.ok; // Return true if the response is OK, false otherwise
+                })
+                    .catch(function (error) {
+                    //console.error('ERROR', error);
+                    return false;
+                })];
+        });
+    });
 }
-;
 function updateCreature(creatureData) {
     fetch('/api/creatures/' + btoa(creatureName) + '/' + btoa(username), {
         method: 'PUT',
@@ -799,6 +810,3 @@ function updateCreature(creatureData) {
         .then(function (data) { return console.log(data); })
         .catch(function (error) { return console.error('ERROR', error); });
 }
-/*function updateCreature(updateParameters: string): void {
-    
-};*/ 

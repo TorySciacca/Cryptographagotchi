@@ -142,7 +142,7 @@ app.put('/api/creatures/:creatureName/:username', (req, res) => {
             return;
         }
         // Return success message
-        ///res.json({ message: 'Creature updated successfully' });
+        res.json({ message: 'Creature updated successfully' });
     });
 });
 

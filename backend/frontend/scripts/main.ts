@@ -160,8 +160,9 @@ function launchDevice(): void {
         case 4:
             bootScreenState++;
             resetScreenText(false);
-            setText('ui_screen_text_l1', 'decrypt');
-            setText('ui_screen_text_l2', 'new egg');
+            setText('ui_screen_text_l1', 'log in');
+            setText('ui_screen_text_l2', 'new user');
+            setText('ui_screen_text_l3', ' ');
             loginScreenState = 2;
             loginScreenSelector();
             gameState = 1;
@@ -206,7 +207,7 @@ function buttonA(): void {
         updateDisplayedCreatureStat(true);
     }
 
-    setBackgroundColor('a', '#f1f8d4ff');
+    setBackgroundColor('a', INITIAL_COLOUR);
 };
 
 async function buttonB(): Promise<void> {
@@ -222,15 +223,15 @@ async function buttonB(): Promise<void> {
         }
     } else if (gameState === 2 || gameState === 3) {
         if (!isUserLoggedIn){
-            usernameLoginState = inputLetters('b',usernameLoginState) // Sign in menu
+            usernameLoginState = inputLetters('b',usernameLoginState) // Sign in menu - username
             if (usernameLoginState > LOGIN_CHARACTER_LIMIT){
                 if (await checkUserLogin()){
                 } else {usernameLoginState--;}}
             }   
         else {
-            cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
+            cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu - creature
             if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT){
-                if (await checkPetLogin()){
+                if (await checkCreatureLogin()){
                     gameState = 4;
                     loadMain()
                 } else {cryptonameLoginState--;}}
@@ -240,7 +241,7 @@ async function buttonB(): Promise<void> {
     } else if (gameState === 5){
         logOut()
     }
-    setBackgroundColor('b', '#f1f8d4ff');
+    setBackgroundColor('b', INITIAL_COLOUR);
 };
 
 function buttonC(): void {
@@ -257,14 +258,13 @@ function buttonC(): void {
             if (usernameLoginState != 0){
                 usernameLoginState = inputLetters('c',usernameLoginState)
             } else {
-                gameState --;
-                bootScreenState = 4;
-                launchDevice();
+                logOut()
             }
         } else {
             if (cryptonameLoginState != 0){
                 cryptonameLoginState = inputLetters('c',cryptonameLoginState)
             } else {
+                logOut()
             }//gameState --; }
         }
 
@@ -280,7 +280,7 @@ function buttonC(): void {
         loadMain()
     }
 
-    setBackgroundColor('c', '#f1f8d4ff');
+    setBackgroundColor('c', INITIAL_COLOUR);
 };
 
 // STATE 1 - Login 
@@ -308,11 +308,9 @@ async function checkUserLogin(): Promise<boolean> {
     if (uiScreenTextL2) {
         const usernameEntered = uiScreenTextL2.innerText;
 
-        let loginSuccess = false;
+        let loginSuccess = await fetchUserByName(usernameEntered); // check if user exists
 
-        if (gameState === 2) {
-            loginSuccess = await fetchUserByName(usernameEntered);
-        } else if (gameState === 3) {
+        if (!loginSuccess && gameState === 3) { //create user if user doesn't exist if signing up
             loginSuccess = await createUser(usernameEntered);
         }
 
@@ -329,19 +327,30 @@ async function checkUserLogin(): Promise<boolean> {
     return false;
 }
 
-async function checkPetLogin(): Promise<boolean>{
+async function checkCreatureLogin(): Promise<boolean> {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
-    if (uiScreenTextL2) {
-        if (await fetchCreatureByName(uiScreenTextL2.innerText)){
-            creatureName = uiScreenTextL2.innerText
-            resetScreenText(false)
-            isUserLoggedIn = true
-            return true
-        } else {
+    if (!uiScreenTextL2) return false;
+
+    let creatureName = uiScreenTextL2.innerText;
+    let loginSuccess = false;
+
+    if (gameState === 3) {
+        let valueInput = await createCreature(creatureName);
+        
+        if (!valueInput) {
             return false
         }
-    };
-    return false;
+    }
+
+    loginSuccess = await fetchCreatureByName(creatureName);
+
+    if (loginSuccess) {
+        resetScreenText(false);
+        isUserLoggedIn = true;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function inputLetters(buttonType:string,inputState:number): number {
@@ -681,18 +690,22 @@ async function createUser(usernameInput: string): Promise<boolean> {
     return false
 };
 
-function createCreature(creatureInput: string): void {
-    fetch('/api/creatures/', {
+async function createCreature(creatureInput: string): Promise<boolean> {
+    return fetch('/api/creatures/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({name: btoa(creatureInput),owner: btoa(username)})
     })
         .then(res => {
-            return res.json();
+            //console.log('Response received:', res);
+            displayAPIResponseToLED(res.status)
+            return res.ok; // Return true if the response is OK, false otherwise
         })
-        .then(data => console.log(data))
-        .catch(error => console.error('ERROR', error));
-};
+        .catch(error => {
+            //console.error('ERROR', error);
+            return false;
+        });
+}
 
 function updateCreature(creatureData: string): void {
     fetch('/api/creatures/' + btoa(creatureName) + '/' + btoa(username), {
@@ -708,6 +721,3 @@ function updateCreature(creatureData: string): void {
         .catch(error => console.error('ERROR', error));
 
 }
-/*function updateCreature(updateParameters: string): void {
-    
-};*/
