@@ -48,7 +48,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main
 var bootScreenState = 0;
 var loginScreenState = 1;
-var usernameLogingState = 0; // 0 - off
+var usernameLoginState = 0; // 0 - off
 var cryptonameLoginState = 0; // 0 - off
 var isUserLoggedIn = false;
 var username = '';
@@ -249,7 +249,7 @@ function buttonA() {
     }
     else if (gameState === 2 || gameState === 3) {
         if (!isUserLoggedIn) {
-            usernameLogingState = inputLetters('a', usernameLogingState);
+            usernameLoginState = inputLetters('a', usernameLoginState);
         }
         else {
             console.log(cryptonameLoginState);
@@ -284,14 +284,14 @@ function buttonB() {
                 case 2:
                     if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 8];
                     if (!!isUserLoggedIn) return [3 /*break*/, 5];
-                    usernameLogingState = inputLetters('b', usernameLogingState); // Sign in menu
-                    if (!(usernameLogingState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
+                    usernameLoginState = inputLetters('b', usernameLoginState); // Sign in menu
+                    if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
                     return [4 /*yield*/, checkUserLogin()];
                 case 3:
                     if (_a.sent()) {
                     }
                     else {
-                        usernameLogingState--;
+                        usernameLoginState--;
                     }
                     _a.label = 4;
                 case 4: return [3 /*break*/, 7];
@@ -312,6 +312,9 @@ function buttonB() {
                 case 8:
                     if (gameState === 4) {
                         isHunting = !isHunting;
+                    }
+                    else if (gameState === 5) {
+                        logOut();
                     }
                     _a.label = 9;
                 case 9:
@@ -335,8 +338,8 @@ function buttonC() {
     }
     else if (gameState === 2 || gameState === 3) {
         if (!isUserLoggedIn) {
-            if (usernameLogingState != 0) {
-                usernameLogingState = inputLetters('c', usernameLogingState);
+            if (usernameLoginState != 0) {
+                usernameLoginState = inputLetters('c', usernameLoginState);
             }
             else {
                 gameState--;
@@ -356,6 +359,14 @@ function buttonC() {
         gameState--;
         bootScreenState = 4;
         launchDevice();
+    }
+    else if (gameState === 4) {
+        gameState++;
+        askToLogOut();
+    }
+    else if (gameState === 5) {
+        gameState--;
+        loadMain();
     }
     setBackgroundColor('c', '#f1f8d4ff');
 }
@@ -497,6 +508,7 @@ function circularCharacter(char, direction) {
 // fatigue = creatureData.fatigue
 // isHunting = creatureData.isHunting
 var isHunting = false;
+var creatureStateUITick = 0;
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
 var creatureHealRate = 0;
@@ -511,31 +523,32 @@ function setCreatureMode(isHunting) {
     }
 }
 setInterval(function () {
-    creatureGrowthRate = 1;
+    creatureGrowthRate = 2;
     creatureRiskFactor = 1;
     creatureHealRate = 1;
-    if (gameState > 3) {
+    if (gameState === 4) {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) {
-            //creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 2);
-            //creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 2);
             //gain fatigue at growth rate
+            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
         }
         else { //is resting
-            creatureData.health = Math.min(100, creatureData.health + creatureHealRate / 2);
-            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate + creatureHealRate);
+            //gain health at half growth rate
+            creatureData.health = Math.min(100, Math.round(creatureData.health + creatureHealRate / 2));
             //lose fatigue at growth rate
+            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue - creatureGrowthRate));
         }
+        //always gain hunger at half of growth rate
+        creatureData.hunger = Math.min(100, Math.round(creatureData.hunger + (creatureGrowthRate / 2)));
         var uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
         var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
-            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
+            uiScreenTextL1.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
             updateCreatureImage();
-            uiScreenTextL2.innerText = ' . ';
-            //String(creatureData.health.toFixed(0)).padStart(2, ' ') + '% ' + String(creatureData.hunger.toFixed(0)).padStart(2, ' ') + '%';
-            uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
-            //save creature data
+            uiScreenTextL2.innerText = ' . '; // leaves space for image
+            uiScreenTextL3.innerText = updateDisplayedCreatureStat(false);
+            //save creature data to database
             var creatureDataString = JSON.stringify(creatureData);
             updateCreature(creatureDataString);
         }
@@ -544,16 +557,16 @@ setInterval(function () {
 setInterval(function () {
     if (gameState > 3 && isHunting) {
         var generateFight = function () {
-            // randomly select either a or b
+            // randomly select either a or b. In future, more complex fights can be implemented by comparing creatures mass and creatureRiskFactor.
             var select = Math.random() >= 0.5 ? 'win' : 'loss';
             switch (select) {
                 case 'win':
-                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 20);
-                    console.log('win');
+                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 25);
+                    flashLED(document.getElementById("green"), 'green', 100, 5);
                     break;
                 case 'loss':
-                    creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 20);
-                    console.log('loss');
+                    creatureData.health = Math.max(0, creatureData.health - creatureHealRate * 12);
+                    flashLED(document.getElementById("red"), 'red', 100, 5);
                     break;
             }
         };
@@ -561,15 +574,18 @@ setInterval(function () {
     }
 }, 10000);
 function updateDisplayedCreatureStat(swap) {
-    // 0 = mass, 1 = health, 2 = hunger
+    // 0 = mass, 1 = health, 2 = hunger, 3 = fatigue
     if (swap) {
-        displayedCreatureStat = displayedCreatureStat === 2 ? 0 : displayedCreatureStat + 1;
+        displayedCreatureStat = (displayedCreatureStat + 1) % 3;
     }
     if (displayedCreatureStat === 1) {
-        return 'hp: ' + String(creatureData.health) + '%';
+        return 'hea: ' + String(creatureData.health) + '%';
     }
     else if (displayedCreatureStat === 2) {
         return 'hgr: ' + String(creatureData.hunger) + '%';
+    }
+    else if (displayedCreatureStat === 3) {
+        return 'ftg: ' + String(creatureData.fatigue) + '%';
     }
     else {
         return scaleToMetric(creatureData.mass);
@@ -598,12 +614,20 @@ function updateCreatureImage() {
 function getImageScale(mass) {
     return Math.min(6, Math.floor(Math.log10(mass))) + '';
 }
+function tickCurrentCreatureState() {
+    creatureStateUITick++;
+    if (creatureStateUITick > 3) {
+        creatureStateUITick = 0;
+    }
+    return '.'.repeat(creatureStateUITick);
+}
 function loadMain() {
     try {
         if (creatureData === null) {
             throw new Error('creatureData is null');
         }
         else {
+            resetScreenText(false);
             var creatureDataText = document.getElementById("ui_screen_text_l2");
             if (creatureDataText != null) {
                 creatureDataText.innerText === String(creatureData.mass);
@@ -613,6 +637,32 @@ function loadMain() {
     catch (error) {
         console.error('Error loading creature data:', error);
     }
+}
+// STATE 5 - User Logout
+function askToLogOut() {
+    resetScreenText(false);
+    var creatureImage = document.getElementById("creature");
+    if (creatureImage) {
+        creatureImage.style.visibility = "hidden";
+    }
+    var uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        uiScreenTextL2.innerText = 'log out?';
+        uiScreenTextL2.style.color = INITIAL_COLOUR; // light
+        uiScreenTextL2.style.backgroundColor = SELECT_COLOUR; // dark
+    }
+}
+function logOut() {
+    isUserLoggedIn = false;
+    resetScreenText(false);
+    username = '';
+    creatureName = '';
+    creatureData = null;
+    gameState = 0;
+    bootScreenState = 0;
+    loginScreenState = 1;
+    usernameLoginState = 0;
+    cryptonameLoginState = 0;
 }
 // REST API FUNCTIONS
 function fetchUsers() {

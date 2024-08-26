@@ -3,7 +3,7 @@ let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/de
 let bootScreenState: number = 0;
 let loginScreenState: number = 1;
 
-let usernameLogingState: number = 0; // 0 - off
+let usernameLoginState: number = 0; // 0 - off
 let cryptonameLoginState: number = 0; // 0 - off
 let isUserLoggedIn: boolean = false
 let username: string= ''
@@ -197,7 +197,7 @@ function buttonA(): void {
         loginScreenSelector();
     } else if (gameState === 2 || gameState === 3){
         if (!isUserLoggedIn){
-            usernameLogingState = inputLetters('a',usernameLogingState)
+            usernameLoginState = inputLetters('a',usernameLoginState)
         } else{
             console.log(cryptonameLoginState)
             cryptonameLoginState = inputLetters('a',cryptonameLoginState);
@@ -222,10 +222,10 @@ async function buttonB(): Promise<void> {
         }
     } else if (gameState === 2 || gameState === 3) {
         if (!isUserLoggedIn){
-            usernameLogingState = inputLetters('b',usernameLogingState) // Sign in menu
-            if (usernameLogingState > LOGIN_CHARACTER_LIMIT){
+            usernameLoginState = inputLetters('b',usernameLoginState) // Sign in menu
+            if (usernameLoginState > LOGIN_CHARACTER_LIMIT){
                 if (await checkUserLogin()){
-                } else {usernameLogingState--;}}
+                } else {usernameLoginState--;}}
             }   
         else {
             cryptonameLoginState = inputLetters('b',cryptonameLoginState) // Sign in menu
@@ -237,6 +237,8 @@ async function buttonB(): Promise<void> {
             }
     } else if (gameState === 4){
         isHunting = !isHunting;
+    } else if (gameState === 5){
+        logOut()
     }
     setBackgroundColor('b', '#f1f8d4ff');
 };
@@ -252,8 +254,8 @@ function buttonC(): void {
         launchDevice();
     } else if (gameState === 2 || gameState === 3) {
         if (!isUserLoggedIn){
-            if (usernameLogingState != 0){
-                usernameLogingState = inputLetters('c',usernameLogingState)
+            if (usernameLoginState != 0){
+                usernameLoginState = inputLetters('c',usernameLoginState)
             } else {
                 gameState --;
                 bootScreenState = 4;
@@ -270,6 +272,12 @@ function buttonC(): void {
         gameState --;
         bootScreenState = 4;
         launchDevice();
+    } else if(gameState === 4) {
+        gameState ++;
+        askToLogOut();
+    } else if(gameState === 5) {
+        gameState --;
+        loadMain()
     }
 
     setBackgroundColor('c', '#f1f8d4ff');
@@ -398,6 +406,7 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 // isHunting = creatureData.isHunting
 
 let isHunting: boolean = false;
+let creatureStateUITick: number = 0;
 
 let creatureGrowthRate: number = 0;
 let creatureRiskFactor: number = 0;
@@ -416,37 +425,38 @@ function setCreatureMode(isHunting:boolean) {
 }
 
 setInterval(function(){ // EVERY TICK
-    creatureGrowthRate = 1
+    creatureGrowthRate = 2
     creatureRiskFactor = 1
     creatureHealRate = 1
 
-    if (gameState > 3) {
+    if (gameState === 4) {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) { 
             //gain fatigue at growth rate
-            creatureData.fatigue = Math.max(0, creatureData.fatigue + creatureGrowthRate);
+            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
         } else  { //is resting
             //gain health at half growth rate
-            creatureData.health = Math.min(100, creatureData.health + creatureHealRate / 2);
-            //gain hunger at growth rate + heal rate
-            creatureData.hunger = Math.min(100, creatureData.hunger + creatureGrowthRate + creatureHealRate);
+            creatureData.health = Math.min(100, Math.round(creatureData.health + creatureHealRate / 2));
             //lose fatigue at growth rate
-            creatureData.fatigue = Math.max(0, creatureData.fatigue - creatureGrowthRate);
+            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue - creatureGrowthRate));
         }
+        //always gain hunger at half of growth rate
+        creatureData.hunger = Math.min(100, Math.round(creatureData.hunger + (creatureGrowthRate  / 2)));
 
         const uiScreenTextL1 = document.getElementById("ui_screen_text_l1");
         const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
         const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
-        if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
-            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+        if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null){
+            uiScreenTextL1.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
             updateCreatureImage()
             uiScreenTextL2.innerText = ' . ' // leaves space for image
-            uiScreenTextL3.innerText = isHunting ? 'hunting' : 'resting';
+            uiScreenTextL3.innerText = updateDisplayedCreatureStat(false)
         
             //save creature data to database
             let creatureDataString = JSON.stringify(creatureData);
             updateCreature(creatureDataString)
+
         }
     }
 }, 1000);
@@ -454,16 +464,16 @@ setInterval(function(){ // EVERY TICK
 setInterval(function(){ // EVERY 10 TICKS, FIGHT
     if (gameState > 3 && isHunting) {
         const generateFight = () => {
-            // randomly select either a or b
+            // randomly select either a or b. In future, more complex fights can be implemented by comparing creatures mass and creatureRiskFactor.
             const select = Math.random() >= 0.5 ? 'win' : 'loss';
             switch (select) {
                 case 'win':
-                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 20);
-                    console.log('win');
+                    creatureData.hunger = Math.max(0, creatureData.hunger - creatureGrowthRate * 25);
+                    flashLED(document.getElementById("green")!, 'green', 100, 5);
                     break;
                 case 'loss':
-                    creatureData.health = Math.max(0, creatureData.health - creatureGrowthRate * 20);
-                    console.log('loss');
+                    creatureData.health = Math.max(0, creatureData.health - creatureHealRate * 12); 
+                    flashLED(document.getElementById("red")!, 'red', 100, 5);
                     break;
             }
         };
@@ -479,11 +489,11 @@ function updateDisplayedCreatureStat(swap:boolean): string {
     }
 
     if (displayedCreatureStat === 1) {
-        return 'hlth: ' + String(creatureData.health) + '%';
+        return 'hea: ' + String(creatureData.health) + '%';
     } else if (displayedCreatureStat === 2) {
-        return 'hngr: ' + String(creatureData.hunger) + '%';
+        return 'hgr: ' + String(creatureData.hunger) + '%';
     } else if (displayedCreatureStat === 3) {
-        return 'ftge: ' + String(creatureData.fatigue) + '%';
+        return 'ftg: ' + String(creatureData.fatigue) + '%';
     } else {
         return scaleToMetric(creatureData.mass);
     }
@@ -514,11 +524,21 @@ function getImageScale(mass: number): string {
     return Math.min(6, Math.floor(Math.log10(mass))) + '';
 }
 
+function tickCurrentCreatureState(): string {
+    creatureStateUITick ++;
+    if (creatureStateUITick > 3) {
+        creatureStateUITick = 0;
+    }
+
+    return '.'.repeat(creatureStateUITick);
+}
+
 function loadMain():void{
     try {
         if (creatureData === null) {
             throw new Error('creatureData is null');
         } else {
+            resetScreenText(false)
             const creatureDataText = document.getElementById("ui_screen_text_l2");
 
             if (creatureDataText != null) {
@@ -528,6 +548,35 @@ function loadMain():void{
     } catch (error) {
         console.error('Error loading creature data:', error);
     }
+}
+// STATE 5 - User Logout
+
+function askToLogOut(): void {
+    resetScreenText(false)
+    const creatureImage = document.getElementById("creature") as HTMLImageElement | null;
+    if (creatureImage) {
+        creatureImage.style.visibility = "hidden";
+    }
+
+    const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
+    if (uiScreenTextL2) {
+        uiScreenTextL2.innerText = 'log out?'
+        uiScreenTextL2.style.color = INITIAL_COLOUR; // light
+        uiScreenTextL2.style.backgroundColor = SELECT_COLOUR // dark
+    }
+}
+
+function logOut(): void {
+    isUserLoggedIn = false;
+    resetScreenText(false)
+    username = ''
+    creatureName = ''
+    creatureData = null
+    gameState = 0
+    bootScreenState = 0
+    loginScreenState = 1
+    usernameLoginState = 0
+    cryptonameLoginState = 0
 }
 
 // REST API FUNCTIONS
