@@ -7,6 +7,13 @@ Users will be able to generate virtual pets that exist within the ecosystem.
 
 ## Features
 
+### UX
+The app is designed to have a similar look and feel to a vintage Tamagotchi, with three buttons:
+
+* A: Switches between options
+* B: Selects an option
+* C: Goes back or cancels an action
+
 ### User Management
 - Users can sign up and login
 - Sessions are maintained server-side
