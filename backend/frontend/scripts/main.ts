@@ -49,15 +49,15 @@ function mapKeyboardShortcuts(): void {
     window.addEventListener('keydown', (event: KeyboardEvent) => {
         switch (event.key) {
             case '1':
-                buttonA();
+                handleButtonA();
                 setBackgroundColor('a', INITIAL_COLOUR);
                 break;
             case '2':
-                buttonB();
+                handleButtonB();
                 setBackgroundColor('b', INITIAL_COLOUR);
                 break;
             case '3':
-                buttonC();
+                handleButtonC();
                 setBackgroundColor('c', INITIAL_COLOUR);
                 break;
         }
@@ -81,13 +81,13 @@ function mapKeyboardShortcuts(): void {
         const targetId = (event.target as HTMLElement)?.id;
         switch (targetId) {
             case 'a':
-                buttonA();
+                handleButtonA();
                 break;
             case 'b':
-                buttonB();
+                handleButtonB();
                 break;
             case 'c':
-                buttonC();
+                handleButtonC();
                 break;
         }
     });
@@ -229,7 +229,7 @@ function updateLoginScreenState(): void {
     }
 }
 
-async function buttonB(): Promise<void> {
+async function handleButtonB(): Promise<void> {
     switch (gameState) {
         case 0:
             launchDevice();
