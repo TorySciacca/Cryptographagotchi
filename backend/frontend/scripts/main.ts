@@ -203,7 +203,7 @@ function handleButtonA(): void {
             if (!isUserLoggedIn) {
                 usernameLoginState = inputLetters('a', usernameLoginState);
             } else {
-                creatureNameLoginState = inputLetters('a', creatureNameLoginState);
+                cryptonameLoginState = inputLetters('a', cryptonameLoginState);
             }
             break;
         case 4:
