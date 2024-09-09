@@ -88,15 +88,15 @@ function mapKeyboardShortcuts() {
     window.addEventListener('keydown', function (event) {
         switch (event.key) {
             case '1':
-                buttonA();
+                handleButtonA();
                 setBackgroundColor('a', INITIAL_COLOUR);
                 break;
             case '2':
-                buttonB();
+                handleButtonB();
                 setBackgroundColor('b', INITIAL_COLOUR);
                 break;
             case '3':
-                buttonC();
+                handleButtonC();
                 setBackgroundColor('c', INITIAL_COLOUR);
                 break;
         }
@@ -119,13 +119,13 @@ function mapKeyboardShortcuts() {
         var targetId = (_a = event.target) === null || _a === void 0 ? void 0 : _a.id;
         switch (targetId) {
             case 'a':
-                buttonA();
+                handleButtonA();
                 break;
             case 'b':
-                buttonB();
+                handleButtonB();
                 break;
             case 'c':
-                buttonC();
+                handleButtonC();
                 break;
         }
     });
@@ -244,81 +244,97 @@ function updateSelector(selector, minValue, maxValue) {
     return selector < maxValue ? selector + 1 : minValue;
 }
 ;
-function buttonA() {
-    if (gameState === 1) {
-        loginScreenSelector();
-    }
-    else if (gameState === 2 || gameState === 3) {
-        if (!isUserLoggedIn) {
-            usernameLoginState = inputLetters('a', usernameLoginState);
-        }
-        else {
-            console.log(cryptonameLoginState);
-            cryptonameLoginState = inputLetters('a', cryptonameLoginState);
-        }
-    }
-    else if (gameState === 4) {
-        updateDisplayedCreatureStat(true);
+function handleButtonA() {
+    switch (gameState) {
+        case 1:
+            updateLoginScreenState();
+            break;
+        case 2:
+        case 3:
+            if (!isUserLoggedIn) {
+                usernameLoginState = inputLetters('a', usernameLoginState);
+            }
+            else {
+                cryptonameLoginState = inputLetters('a', cryptonameLoginState);
+            }
+            break;
+        case 4:
+            updateDisplayedCreatureStat(true);
+            break;
     }
     setBackgroundColor('a', INITIAL_COLOUR);
 }
-;
-function buttonB() {
+function updateLoginScreenState() {
+    var currentLoginScreenText = document.getElementById("ui_screen_text_l".concat(loginScreenState));
+    if (currentLoginScreenText) {
+        currentLoginScreenText.style.color = SELECT_COLOUR; // light
+        currentLoginScreenText.style.backgroundColor = INITIAL_COLOUR; // dark
+    }
+    loginScreenState = loginScreenState === 1 ? 2 : 1;
+    var newLoginScreenText = document.getElementById("ui_screen_text_l".concat(loginScreenState));
+    if (newLoginScreenText) {
+        newLoginScreenText.style.color = INITIAL_COLOUR; // dark
+        newLoginScreenText.style.backgroundColor = SELECT_COLOUR; // light
+    }
+}
+function handleButtonB() {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    if (!(gameState === 0)) return [3 /*break*/, 1];
-                    launchDevice();
-                    return [3 /*break*/, 9];
+                    _a = gameState;
+                    switch (_a) {
+                        case 0: return [3 /*break*/, 1];
+                        case 1: return [3 /*break*/, 2];
+                        case 2: return [3 /*break*/, 3];
+                        case 3: return [3 /*break*/, 3];
+                        case 4: return [3 /*break*/, 9];
+                        case 5: return [3 /*break*/, 10];
+                    }
+                    return [3 /*break*/, 11];
                 case 1:
-                    if (!(gameState === 1)) return [3 /*break*/, 2];
-                    if (loginScreenState === 1) {
-                        gameState = 2;
-                        enterUser(true);
-                    }
-                    else if (loginScreenState === 2) {
-                        gameState = 3;
-                        enterUser(true);
-                    }
-                    return [3 /*break*/, 9];
+                    launchDevice();
+                    return [3 /*break*/, 11];
                 case 2:
-                    if (!(gameState === 2 || gameState === 3)) return [3 /*break*/, 8];
-                    if (!!isUserLoggedIn) return [3 /*break*/, 5];
-                    usernameLoginState = inputLetters('b', usernameLoginState); // Sign in menu - username
-                    if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, checkUserLogin()];
+                    gameState = loginScreenState === 1 ? 2 : 3;
+                    enterUser(true);
+                    return [3 /*break*/, 11];
                 case 3:
-                    if (_a.sent()) {
+                    if (!!isUserLoggedIn) return [3 /*break*/, 6];
+                    usernameLoginState = inputLetters('b', usernameLoginState);
+                    if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, checkUserLogin()];
+                case 4:
+                    if (_b.sent()) {
+                        // Do nothing
                     }
                     else {
                         usernameLoginState--;
                     }
-                    _a.label = 4;
-                case 4: return [3 /*break*/, 7];
-                case 5:
-                    cryptonameLoginState = inputLetters('b', cryptonameLoginState); // Sign in menu - creature
-                    if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 7];
-                    return [4 /*yield*/, checkCreatureLogin()];
+                    _b.label = 5;
+                case 5: return [3 /*break*/, 8];
                 case 6:
-                    if (_a.sent()) {
+                    cryptonameLoginState = inputLetters('b', cryptonameLoginState);
+                    if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, checkCreatureLogin()];
+                case 7:
+                    if (_b.sent()) {
                         gameState = 4;
                         loadMain();
                     }
                     else {
                         cryptonameLoginState--;
                     }
-                    _a.label = 7;
-                case 7: return [3 /*break*/, 9];
-                case 8:
-                    if (gameState === 4) {
-                        isHunting = !isHunting;
-                    }
-                    else if (gameState === 5) {
-                        logOut();
-                    }
-                    _a.label = 9;
+                    _b.label = 8;
+                case 8: return [3 /*break*/, 11];
                 case 9:
+                    isHunting = !isHunting;
+                    return [3 /*break*/, 11];
+                case 10:
+                    logOut();
+                    return [3 /*break*/, 11];
+                case 11:
                     setBackgroundColor('b', INITIAL_COLOUR);
                     return [2 /*return*/];
             }
@@ -326,51 +342,52 @@ function buttonB() {
     });
 }
 ;
-function buttonC() {
-    if (gameState === 0) {
-        bootScreenState--;
-        bootScreenState--;
-        launchDevice();
-    }
-    else if (gameState === 1) {
-        gameState--;
-        bootScreenState = 0;
-        launchDevice();
-    }
-    else if (gameState === 2 || gameState === 3) {
-        if (!isUserLoggedIn) {
-            if (usernameLoginState != 0) {
-                usernameLoginState = inputLetters('c', usernameLoginState);
+function handleButtonC() {
+    switch (gameState) {
+        case 0:
+            bootScreenState -= 2;
+            launchDevice();
+            break;
+        case 1:
+            gameState--;
+            bootScreenState = 0;
+            launchDevice();
+            break;
+        case 2:
+        case 3:
+            if (!isUserLoggedIn) {
+                if (usernameLoginState !== 0) {
+                    usernameLoginState = inputLetters('c', usernameLoginState);
+                }
+                else {
+                    logOut();
+                }
             }
             else {
-                logOut();
+                if (cryptonameLoginState !== 0) {
+                    cryptonameLoginState = inputLetters('c', cryptonameLoginState);
+                }
+                else {
+                    logOut();
+                }
             }
-        }
-        else {
-            if (cryptonameLoginState != 0) {
-                cryptonameLoginState = inputLetters('c', cryptonameLoginState);
-            }
-            else {
-                logOut();
-            } //gameState --; }
-        }
-    }
-    else if (gameState === 3) {
-        gameState--;
-        bootScreenState = 4;
-        launchDevice();
-    }
-    else if (gameState === 4) {
-        gameState++;
-        askToLogOut();
-    }
-    else if (gameState === 5) {
-        gameState--;
-        loadMain();
+            break;
+        case 3:
+            gameState--;
+            bootScreenState = 4;
+            launchDevice();
+            break;
+        case 4:
+            gameState++;
+            askToLogOut();
+            break;
+        case 5:
+            gameState--;
+            loadMain();
+            break;
     }
     setBackgroundColor('c', INITIAL_COLOUR);
 }
-;
 // STATE 1 - Login 
 function enterUser(isUsername) {
     resetScreenText(false);
