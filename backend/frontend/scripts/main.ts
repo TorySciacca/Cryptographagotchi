@@ -490,10 +490,12 @@ setInterval(function(){ // EVERY TICK
         const uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null){
-            uiScreenTextL1.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
+            //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
             updateCreatureImage()
             uiScreenTextL2.innerText = ' . ' // leaves space for image
-            uiScreenTextL3.innerText = updateDisplayedCreatureStat(false)
+            //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+            uiScreenTextL1.innerText = creatureData.health.toString() + ' ' + creatureData.hunger.toString() + ' ' + creatureData.fatigue.toString();
+            uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
         
             //save creature data to database
             let creatureDataString = JSON.stringify(creatureData);
