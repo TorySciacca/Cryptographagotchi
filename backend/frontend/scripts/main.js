@@ -279,7 +279,7 @@ function updateLoginScreenState() {
 }
 function handleButtonB() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a;
+        var _a, err_1, err_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -289,36 +289,46 @@ function handleButtonB() {
                         case 1: return [3 /*break*/, 2];
                         case 2: return [3 /*break*/, 3];
                         case 3: return [3 /*break*/, 3];
-                        case 4: return [3 /*break*/, 9];
-                        case 5: return [3 /*break*/, 10];
+                        case 4: return [3 /*break*/, 13];
+                        case 5: return [3 /*break*/, 14];
                     }
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 15];
                 case 1:
                     launchDevice();
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 15];
                 case 2:
                     gameState = loginScreenState === 1 ? 2 : 3;
                     enterUser(true);
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 15];
                 case 3:
-                    if (!!isUserLoggedIn) return [3 /*break*/, 6];
+                    if (!!isUserLoggedIn) return [3 /*break*/, 8];
                     usernameLoginState = inputLetters('b', usernameLoginState);
-                    if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, checkUserLogin()];
+                    if (!(usernameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 7];
+                    _b.label = 4;
                 case 4:
+                    _b.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, checkUserLogin()];
+                case 5:
                     if (_b.sent()) {
-                        // Do nothing
+                        // TODO: Update the game state to 4 when the user has successfully logged in
                     }
                     else {
                         usernameLoginState--;
                     }
-                    _b.label = 5;
-                case 5: return [3 /*break*/, 8];
+                    return [3 /*break*/, 7];
                 case 6:
+                    err_1 = _b.sent();
+                    console.error('Error in checkUserLogin:', err_1);
+                    return [3 /*break*/, 7];
+                case 7: return [3 /*break*/, 12];
+                case 8:
                     cryptonameLoginState = inputLetters('b', cryptonameLoginState);
-                    if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 8];
+                    if (!(cryptonameLoginState > LOGIN_CHARACTER_LIMIT)) return [3 /*break*/, 12];
+                    _b.label = 9;
+                case 9:
+                    _b.trys.push([9, 11, , 12]);
                     return [4 /*yield*/, checkCreatureLogin()];
-                case 7:
+                case 10:
                     if (_b.sent()) {
                         gameState = 4;
                         loadMain();
@@ -326,15 +336,19 @@ function handleButtonB() {
                     else {
                         cryptonameLoginState--;
                     }
-                    _b.label = 8;
-                case 8: return [3 /*break*/, 11];
-                case 9:
-                    isHunting = !isHunting;
-                    return [3 /*break*/, 11];
-                case 10:
-                    logOut();
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 12];
                 case 11:
+                    err_2 = _b.sent();
+                    console.error('Error in checkCreatureLogin:', err_2);
+                    return [3 /*break*/, 12];
+                case 12: return [3 /*break*/, 15];
+                case 13:
+                    isHunting = !isHunting;
+                    return [3 /*break*/, 15];
+                case 14:
+                    logOut();
+                    return [3 /*break*/, 15];
+                case 15:
                     setBackgroundColor('b', INITIAL_COLOUR);
                     return [2 /*return*/];
             }
@@ -439,7 +453,7 @@ function checkUserLogin() {
 }
 function checkCreatureLogin() {
     return __awaiter(this, void 0, void 0, function () {
-        var uiScreenTextL2, creatureName, loginSuccess, valueInput;
+        var uiScreenTextL2, loginSuccess, valueInput;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -568,8 +582,7 @@ setInterval(function () {
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
             updateCreatureImage();
             uiScreenTextL2.innerText = ' . '; // leaves space for image
-            //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
-            uiScreenTextL1.innerText = creatureData.health.toString() + ' ' + creatureData.hunger.toString() + ' ' + creatureData.fatigue.toString();
+            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
             uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
             //save creature data to database
             var creatureDataString = JSON.stringify(creatureData);
@@ -602,7 +615,7 @@ function updateDisplayedCreatureStat(swap) {
         displayedCreatureStat = (displayedCreatureStat + 1) % 3;
     }
     if (displayedCreatureStat === 1) {
-        return 'hea: ' + String(creatureData.health) + '%';
+        return 'hth: ' + String(creatureData.health) + '%';
     }
     else if (displayedCreatureStat === 2) {
         return 'hgr: ' + String(creatureData.hunger) + '%';
@@ -611,7 +624,7 @@ function updateDisplayedCreatureStat(swap) {
         return 'ftg: ' + String(creatureData.fatigue) + '%';
     }
     else {
-        return scaleToMetric(creatureData.mass);
+        return creatureData.health.toString() + ' ' + creatureData.hunger.toString() + ' ' + creatureData.fatigue.toString();
     }
 }
 function scaleToMetric(input) {

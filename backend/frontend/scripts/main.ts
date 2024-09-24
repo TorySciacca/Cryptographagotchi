@@ -243,20 +243,28 @@ async function handleButtonB(): Promise<void> {
             if (!isUserLoggedIn) {
                 usernameLoginState = inputLetters('b', usernameLoginState);
                 if (usernameLoginState > LOGIN_CHARACTER_LIMIT) {
-                    if (await checkUserLogin()) {
-                        // Do nothing
-                    } else {
-                        usernameLoginState--;
+                    try {
+                        if (await checkUserLogin()) {
+                            // TODO: Update the game state to 4 when the user has successfully logged in
+                        } else {
+                            usernameLoginState--;
+                        }
+                    } catch (err) {
+                        console.error('Error in checkUserLogin:', err);
                     }
                 }
             } else {
                 cryptonameLoginState = inputLetters('b', cryptonameLoginState);
                 if (cryptonameLoginState > LOGIN_CHARACTER_LIMIT) {
-                    if (await checkCreatureLogin()) {
-                        gameState = 4;
-                        loadMain();
-                    } else {
-                        cryptonameLoginState--;
+                    try {
+                        if (await checkCreatureLogin()) {
+                            gameState = 4;
+                            loadMain();
+                        } else {
+                            cryptonameLoginState--;
+                        }
+                    } catch (err) {
+                        console.error('Error in checkCreatureLogin:', err);
                     }
                 }
             }
@@ -315,7 +323,6 @@ function handleButtonC(): void {
 
     setBackgroundColor('c', INITIAL_COLOUR);
 }
-
 // STATE 1 - Login 
 
 function enterUser(isUsername:boolean): void {
@@ -364,7 +371,7 @@ async function checkCreatureLogin(): Promise<boolean> {
     const uiScreenTextL2 = document.getElementById("ui_screen_text_l2");
     if (!uiScreenTextL2) return false;
 
-    let creatureName = uiScreenTextL2.innerText;
+    creatureName = uiScreenTextL2.innerText;
     let loginSuccess = false;
 
     if (gameState === 3) {
@@ -493,14 +500,11 @@ setInterval(function(){ // EVERY TICK
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
             updateCreatureImage()
             uiScreenTextL2.innerText = ' . ' // leaves space for image
-            //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
-            uiScreenTextL1.innerText = creatureData.health.toString() + ' ' + creatureData.hunger.toString() + ' ' + creatureData.fatigue.toString();
+            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
             uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
         
             //save creature data to database
-            let creatureDataString = JSON.stringify(creatureData);
-            updateCreature(creatureDataString)
-
+            updateCreature(JSON.stringify(creatureData))
         }
     }
 }, 1000);
@@ -533,13 +537,13 @@ function updateDisplayedCreatureStat(swap:boolean): string {
     }
 
     if (displayedCreatureStat === 1) {
-        return 'hea: ' + String(creatureData.health) + '%';
+        return 'hth: ' + String(creatureData.health) + '%';
     } else if (displayedCreatureStat === 2) {
         return 'hgr: ' + String(creatureData.hunger) + '%';
     } else if (displayedCreatureStat === 3) {
         return 'ftg: ' + String(creatureData.fatigue) + '%';
     } else {
-        return scaleToMetric(creatureData.mass);
+        return creatureData.health.toString() + ' ' + creatureData.hunger.toString() + ' ' + creatureData.fatigue.toString();
     }
 }
 

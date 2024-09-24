@@ -132,7 +132,7 @@ app.put('/api/creatures/:creatureName/:username', (req, res) => {
 
     // Update creature data in database
 
-    db.run('UPDATE creatures SET mass = ? WHERE cryptoname = ? AND owner = ?', [creatureData.mass, creatureName, username], function(err) {
+    db.run('UPDATE creatures SET mass = ?, health = ?, hunger = ?, fatigue = ? WHERE cryptoname = ? AND owner = ?', [creatureData.mass, creatureData.health, creatureData.hunger, creatureData.fatigue, creatureName, username], function(err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -142,7 +142,7 @@ app.put('/api/creatures/:creatureName/:username', (req, res) => {
             return;
         }
         // Return success message
-        res.json({ message: 'Creature updated successfully' });
+        res.sendStatus(200);
     });
 });
 
