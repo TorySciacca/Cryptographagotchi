@@ -746,17 +746,16 @@ async function createCreature(creatureInput: string): Promise<boolean> {
         });
 }
 
-function updateCreature(creatureData: string): void {
+function updateCreature(creatureData: any): void {
     fetch('/api/creatures/' + btoa(creatureName) + '/' + btoa(username), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: creatureData
     })
         .then(res => {
-            //displayAPIResponseToLED(res.status)
-            return res.json();
+            if (!res.ok) {
+                console.error('ERROR', res);
+            }
         })
-        .then(data => console.log(data))
         .catch(error => console.error('ERROR', error));
-
 }

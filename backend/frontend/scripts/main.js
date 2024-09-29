@@ -585,8 +585,7 @@ setInterval(function () {
             uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
             uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
             //save creature data to database
-            var creatureDataString = JSON.stringify(creatureData);
-            updateCreature(creatureDataString);
+            updateCreature(JSON.stringify(creatureData));
         }
     }
 }, 1000);
@@ -836,9 +835,9 @@ function updateCreature(creatureData) {
         body: creatureData
     })
         .then(function (res) {
-        //displayAPIResponseToLED(res.status)
-        return res.json();
+        if (!res.ok) {
+            console.error('ERROR', res);
+        }
     })
-        .then(function (data) { return console.log(data); })
         .catch(function (error) { return console.error('ERROR', error); });
 }
