@@ -474,9 +474,12 @@ function setCreatureMode(isHunting:boolean) {
 }
 
 setInterval(function(){ // EVERY TICK
+
+    // Test Creature Stats
     creatureGrowthRate = 2
     creatureRiskFactor = 1
     creatureHealRate = 1
+    //
 
     if (gameState === 4) {
         creatureData.mass += creatureGrowthRate;
@@ -498,9 +501,12 @@ setInterval(function(){ // EVERY TICK
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null){
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
-            updateCreatureImage()
-            uiScreenTextL2.innerText = ' . ' // leaves space for image
+    
             uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+
+            updateCreatureImage()
+            uiScreenTextL2.innerText = ' . ' // leaves space for creature sprite
+            
             uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
         
             //save creature data to database
