@@ -42,3 +42,13 @@ The app is designed to have a similar look and feel to a vintage Tamagotchi, wit
 - Uses Node.js
 - Uses SQLite for the database
 - Has a REST API for user management and virtual pets
+
+### Todo
+- Add basic database interactions
+- Update main state UI 
+- Add a clock to the UI
+- Use the clock to age the virtual pets
+- Add a death state to the virtual pets
+- Add a way to feed the virtual pets
+- Add a way to heal the virtual pets
+- Add a way to view virtual pet stats
