@@ -44,7 +44,8 @@ The app is designed to have a similar look and feel to a vintage Tamagotchi, wit
 - Has a REST API for user management and virtual pets
 
 ### TODO Version 1.0
-- Add basic database interactions
+- Functionality 
+  - Add basic database interactions
 - Networking
   - 
 - UI 
