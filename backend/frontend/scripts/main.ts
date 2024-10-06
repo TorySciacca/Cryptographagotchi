@@ -501,8 +501,8 @@ setInterval(function(){ // EVERY TICK
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null){
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
-    
-            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
+            uiScreenTextL1.innerText = '' + creatureData.hunger + '% ' + creatureData.fatigue + '%';
+            //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
 
             updateCreatureImage()
             uiScreenTextL2.innerText = ' . ' // leaves space for creature sprite
