@@ -207,7 +207,7 @@ function handleButtonA(): void {
             }
             break;
         case 4:
-            updateDisplayedCreatureStat(true);
+            //updateDisplayedCreatureStat(true);
             break;
     }
 
