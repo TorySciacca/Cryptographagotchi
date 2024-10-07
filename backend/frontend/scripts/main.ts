@@ -15,7 +15,7 @@ let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 // Constants
 const SELECT_COLOUR: string = '#241f21ff';
 const INITIAL_COLOUR: string = '#f1f8d4ff';
-const DEFAULT_FONT_SIZE = "3.4vh";
+const DEFAULT_FONT_SIZE = "3.3vh";
 const LOGIN_CHARACTER_LIMIT = 3;
 
 // Initialization
@@ -485,7 +485,7 @@ setInterval(function(){ // EVERY TICK
         creatureData.mass += creatureGrowthRate;
         if (isHunting) { 
             //gain fatigue at growth rate
-            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
+            updateCreatureFatiguePerTick()
         } else  { //is resting
             //gain health at half growth rate
             creatureData.health = Math.min(100, Math.round(creatureData.health + creatureHealRate / 2));
@@ -501,7 +501,7 @@ setInterval(function(){ // EVERY TICK
 
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null){
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
-            uiScreenTextL1.innerText = '' + creatureData.hunger + '% ' + creatureData.fatigue + '%';
+            uiScreenTextL1.innerText = 'h' + creatureData.hunger + ' f' + creatureData.fatigue;
             //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
 
             updateCreatureImage()
@@ -534,6 +534,18 @@ setInterval(function(){ // EVERY 10 TICKS, FIGHT
         generateFight();
     }
 },10000);
+
+function updateCreatureFatiguePerTick() {
+    if (creatureData.fatigue > 0 && creatureData.fatigue < 100) {
+        creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
+    } else if (creatureData.fatigue >= 100) {
+        creatureData.fatigue = 100;
+        // add negative effects
+    } else if (creatureData.fatigue <= 0) {
+        creatureData.fatigue = 0;
+        // add negative effects
+    }
+}
 
 function updateDisplayedCreatureStat(swap:boolean): string {
     // 0 = mass, 1 = health, 2 = hunger, 3 = fatigue
