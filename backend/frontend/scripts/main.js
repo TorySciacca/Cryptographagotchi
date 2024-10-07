@@ -58,7 +58,7 @@ var gameDebugMode = true; // bool to determine if debug mode is on/off
 // Constants
 var SELECT_COLOUR = '#241f21ff';
 var INITIAL_COLOUR = '#f1f8d4ff';
-var DEFAULT_FONT_SIZE = "3.4vh";
+var DEFAULT_FONT_SIZE = "3.3vh";
 var LOGIN_CHARACTER_LIMIT = 3;
 // Initialization
 function onStart() {
@@ -259,7 +259,7 @@ function handleButtonA() {
             }
             break;
         case 4:
-            updateDisplayedCreatureStat(true);
+            //updateDisplayedCreatureStat(true);
             break;
     }
     setBackgroundColor('a', INITIAL_COLOUR);
@@ -558,14 +558,16 @@ function setCreatureMode(isHunting) {
     }
 }
 setInterval(function () {
+    // Test Creature Stats
     creatureGrowthRate = 2;
     creatureRiskFactor = 1;
     creatureHealRate = 1;
+    //
     if (gameState === 4) {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) {
             //gain fatigue at growth rate
-            creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
+            updateCreatureHungerPerTick();
         }
         else { //is resting
             //gain health at half growth rate
@@ -580,9 +582,10 @@ setInterval(function () {
         var uiScreenTextL3 = document.getElementById("ui_screen_text_l3");
         if (uiScreenTextL1 != null && uiScreenTextL2 != null && uiScreenTextL3 != null) {
             //uiScreenTextL3.innerText = (isHunting ? 'hunting' : 'resting') + tickCurrentCreatureState();
+            uiScreenTextL1.innerText = 'h' + creatureData.hunger + ' f' + creatureData.fatigue;
+            //uiScreenTextL1.innerText = updateDisplayedCreatureStat(false)
             updateCreatureImage();
-            uiScreenTextL2.innerText = ' . '; // leaves space for image
-            uiScreenTextL1.innerText = updateDisplayedCreatureStat(false);
+            uiScreenTextL2.innerText = ' . '; // leaves space for creature sprite
             uiScreenTextL3.innerText = scaleToMetric(creatureData.mass) + (isHunting ? '(h)' : '(r)');
             //save creature data to database
             updateCreature(JSON.stringify(creatureData));
@@ -608,6 +611,19 @@ setInterval(function () {
         generateFight();
     }
 }, 10000);
+function updateCreatureHungerPerTick() {
+    if (creatureData.fatigue > 0 && creatureData.fatigue < 100) {
+        creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
+    }
+    else if (creatureData.fatigue >= 100) {
+        creatureData.fatigue = 100;
+        // add negative effects
+    }
+    else if (creatureData.fatigue <= 0) {
+        creatureData.fatigue = 0;
+        // add negative effects
+    }
+}
 function updateDisplayedCreatureStat(swap) {
     // 0 = mass, 1 = health, 2 = hunger, 3 = fatigue
     if (swap) {
