@@ -44,6 +44,17 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+// creatureData class
+var CreatureData = /** @class */ (function () {
+    function CreatureData(mass, health, hunger, fatigue, isHunting) {
+        this.mass = mass;
+        this.health = health;
+        this.hunger = hunger;
+        this.fatigue = fatigue;
+        this.isHunting = isHunting;
+    }
+    return CreatureData;
+}());
 // Global variables
 var gameState = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main
 var bootScreenState = 0;
@@ -53,7 +64,7 @@ var cryptonameLoginState = 0; // 0 - off
 var isUserLoggedIn = false;
 var username = '';
 var creatureName = '';
-var creatureData = null; // the json data of the creature, assgined after login
+var creatureData = new CreatureData(0, 0, 0, 0, false); // the json data of the creature, assgined after login
 var gameDebugMode = true; // bool to determine if debug mode is on/off
 // Constants
 var SELECT_COLOUR = '#241f21ff';
@@ -543,7 +554,7 @@ function circularCharacter(char, direction) {
 // fatigue = creatureData.fatigue
 // isHunting = creatureData.isHunting
 var isHunting = false;
-var creatureStateUITick = 0;
+var creatureStateUITick = 0; // TODO: use for snoozing and rename
 var creatureGrowthRate = 0;
 var creatureRiskFactor = 0;
 var creatureHealRate = 0;
@@ -567,7 +578,7 @@ setInterval(function () {
         creatureData.mass += creatureGrowthRate;
         if (isHunting) {
             //gain fatigue at growth rate
-            updateCreatureHungerPerTick();
+            updateCreatureFatiguePerTick();
         }
         else { //is resting
             //gain health at half growth rate
@@ -611,7 +622,7 @@ setInterval(function () {
         generateFight();
     }
 }, 10000);
-function updateCreatureHungerPerTick() {
+function updateCreatureFatiguePerTick() {
     if (creatureData.fatigue > 0 && creatureData.fatigue < 100) {
         creatureData.fatigue = Math.max(0, Math.round(creatureData.fatigue + creatureGrowthRate));
     }
@@ -708,7 +719,7 @@ function logOut() {
     resetScreenText(false);
     username = '';
     creatureName = '';
-    creatureData = null;
+    creatureData = new CreatureData(0, 0, 0, 0, false);
     gameState = 0;
     bootScreenState = 0;
     loginScreenState = 1;
@@ -797,6 +808,7 @@ function fetchCreatureByName(creatureNameInput) {
     })
         .then(function (data) {
         console.log('Creature:', data);
+        console.log(data);
         creatureData = data;
         return true; // Return true indicating success
     })
