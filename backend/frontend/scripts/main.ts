@@ -471,10 +471,10 @@ function circularCharacter(char: string, direction: 'forward' | 'backward'): str
 // isHunting = creatureData.isHunting
 
 let isHunting: boolean = false;
-let creatureStateUITick: number = 0;
+let creatureStateUITick: number = 0; // TODO: use for snoozing and rename
 
-let creatureGrowthRate: number = 0;
-let creatureRiskFactor: number = 0;
+let creatureGrowthRate: number = 0; 
+let creatureRiskFactor: number = 0; 
 let creatureHealRate: number = 0;
 
 let displayedCreatureStat: number = 0;
@@ -653,7 +653,7 @@ function logOut(): void {
     resetScreenText(false)
     username = ''
     creatureName = ''
-    creatureData = null
+    creatureData = new CreatureData(0, 0, 0, 0, false)
     gameState = 0
     bootScreenState = 0
     loginScreenState = 1
@@ -739,6 +739,7 @@ function fetchCreatureByName(creatureNameInput: string): Promise<boolean> {
         })
         .then(data => {
             console.log('Creature:', data);
+            console.log(data)
             creatureData = data
             return true;  // Return true indicating success
         })
