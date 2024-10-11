@@ -1,3 +1,19 @@
+// creatureData class
+class CreatureData {
+    mass: number;
+    health: number;
+    hunger: number;
+    fatigue: number;
+    isHunting: boolean;
+    constructor(mass: number, health: number, hunger: number, fatigue: number, isHunting: boolean) {
+        this.mass = mass;
+        this.health = health;
+        this.hunger = hunger;
+        this.fatigue = fatigue;
+        this.isHunting = isHunting;
+    }
+}
+
 // Global variables
 let gameState: number = 0; // 0 - boot, 1 - login screen selection, 2 - login/decrypt, 3 - sign up, 4 - main
 let bootScreenState: number = 0;
@@ -8,7 +24,7 @@ let cryptonameLoginState: number = 0; // 0 - off
 let isUserLoggedIn: boolean = false
 let username: string= ''
 let creatureName: string = ''
-let creatureData: any = null // the json data of the creature, assgined after login
+let creatureData: CreatureData = new CreatureData(0, 0, 0, 0, false); // the json data of the creature, assgined after login
 
 let gameDebugMode: boolean = true; // bool to determine if debug mode is on/off
 
